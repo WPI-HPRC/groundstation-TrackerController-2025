@@ -1,15 +1,18 @@
+#ifndef ConstantsReal_h
+#define ConstantsReal_h
+
+////////////////////////////////////////////////////////////////////// Physical Constants //////////////////////////////////////////////////////////////////////
+
 ////////////////////////////////////////////////////////////////////// Physical Constants //////////////////////////////////////////////////////////////////////
 
 #define azimuthMainGearTeeth 480 // gear teeth
 #define azimuthMotorPinionTeeth 40 // gear teeth
 #define azimuthEncoderPinionTeeth 40 // gear teeth
 
-
 #define elevationGearboxReduction 20 // ratio
 #define elevationChainReduction 3 // ratio
 
 #define elevationTotalReduction elevationGearboxReduction*elevationChainReduction // ratio
-
 
 #define azimuthEncoderActualTicksPerRev 600 // encoder ticks per rev
 #define azimuthEncoderTicksPerRev azimuthEncoderActualTicksPerRev*4 // quadurature counting means 4 counts per pulse
@@ -47,3 +50,6 @@ constexpr double elevationConversionRatio ( (elevationMaximumAngle-elevationMini
 #define elevationStep 6
 #define elevationDirection 7
 #define elevationDirectionNOT 8
+
+
+#endif // ConstantsReal_h
