@@ -2,9 +2,12 @@
 #define AxisController_h
 
 #include <Arduino.h>
-#include <TeensyStep.h>
 
 #include "Sensor.h"
+
+#include "StepDriver.h"
+
+#include "sCurveProfiler.h"
 
 class AxisController
 {
@@ -56,3 +59,4 @@ class AxisController
 };
 
 #endif // AxisController_h
+

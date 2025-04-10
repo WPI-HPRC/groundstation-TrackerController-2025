@@ -1,5 +1,4 @@
 #include <Arduino.h>
-#include <TeensyStep.h>
 
 // CHOOSE DEPLOY PLATFORM HERE ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #define REAL
@@ -23,6 +22,8 @@
 
 // this handles our interfacing to the outside world
 #include "StreamInterface.h"
+
+
 
 // hardware declerations for azimuth axis
 // Sensor encoderSensor = EncoderSensor();

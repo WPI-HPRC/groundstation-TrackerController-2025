@@ -10,17 +10,11 @@ class EncoderSensor : Sensor
 {
     public:
         EncoderSensor()
-        {
-            Sensor(); 
-        };
+            { Sensor(); };
         void setPins(uint8_t PinA, uint8_t PinB, uint8_t LimitPin) override
-        { 
-            pinA = PinA; 
-            pinB = PinB; 
-            pinLimit = LimitPin; 
-        };
+            { pinA = PinA; pinB = PinB; pinLimit = LimitPin; };
 
-        uint8_t begin () override
+        uint8_t begin() override
         {
             encoder = Encoder(pinA, pinB);
             pinMode(pinLimit, INPUT_PULLUP);
@@ -37,11 +31,6 @@ class EncoderSensor : Sensor
             }
 
             return 0;
-        }
-        
-        int64_t getDistFrom0() override
-        {
-            return currentPos;
         }
 
     private:

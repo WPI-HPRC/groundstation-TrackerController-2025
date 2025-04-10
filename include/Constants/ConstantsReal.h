@@ -21,16 +21,24 @@
 
 ////////////////////////////////////////////////////////////////////// Sensor Calibration Values //////////////////////////////////////////////////////////////////////
 
+// must be determined emperically 
 #define elevationMinimumValue 1024 // ADC reading value
 #define elevationMaximumValue 0 // ADC reading value
 
+// must be determined/defined
 #define elevationMaximumAngle 90 // degrees
 #define elevationMinimumAngle -90 // degrees
 
 constexpr int elevationZeroValue = (elevationMaximumValue - elevationMinimumValue) / 2 ;// ADC reading value
 
+
+
+
 // this assumes a linear relationship (which should be true since we bought linear pots)
 constexpr double elevationConversionRatio ( (elevationMaximumAngle-elevationMinimumAngle) / (elevationMaximumValue-elevationMinimumValue) ); // adc readings to degrees
+
+// 360 degrees / ticks per revolution * gear ratio
+constexpr double azimuthConversionRatio ( (360/azimuthEncoderTicksPerRev) * (azimuthEncoderPinionTeeth / azimuthMainGearTeeth) ); // encoder ticks to degrees
 
 
 ////////////////////////////////////////////////////////////////////// Pins //////////////////////////////////////////////////////////////////////
@@ -43,13 +51,12 @@ constexpr double elevationConversionRatio ( (elevationMaximumAngle-elevationMini
 #define azimuthStep 4
 #define azimuthDirection 5
 
+#define elevationPotentiometer 6
 
-
-#define elevationPotentiometer 9
-
-#define elevationStep 6
-#define elevationDirection 7
-#define elevationDirectionNOT 8
+#define elevationStep 7
+#define elevationDirection 8
+#define elevationStep2 9
+#define elevationDirection2 10
 
 
 #endif // ConstantsReal_h

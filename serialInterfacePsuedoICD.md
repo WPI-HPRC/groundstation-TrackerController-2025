@@ -113,7 +113,7 @@ D;I;XXXXX,YYYYY,ZZZZZ,HHHHH;E
 The current intended use for the __coasting__ method is preventing damage to the tracker mechanisms in high wind conditions, by allowing the tracker to act in a similar fashion as a wind vane. 
 
 ### Braking the Tracker
-**To cause the tracker to stop all current movements and use the motors to hold the current position**, the following message format should be used:
+**To cause the tracker to stop all Zcurrent movements and use the motors to hold the current position**, the following message format should be used:
 ```
 G;B;E
 ```
