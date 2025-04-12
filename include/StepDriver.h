@@ -7,14 +7,14 @@
 class StepDriver
 {
     public:
-        StepDriver();
+        StepDriver(){};
 
         void setPins(uint8_t DirectionPin, uint8_t StepPin) // single driver
             { doubleDriver = false; dirPin = DirectionPin; stepPin = StepPin; };
         void setPins(uint8_t DirectionPin, uint8_t StepPin, uint8_t DirectionPin2, uint8_t StepPin2) // double driver
             { doubleDriver = true; dirPin = DirectionPin; stepPin = StepPin; dirPin2 = DirectionPin2; stepPin2 = StepPin2; };
 
-        void setPhysicalConstants(double degreesPerStep, uint64_t microstepResolution)
+        void setPhysicalConstants(float degreesPerStep, uint64_t microstepResolution)
             { degPerStep = degreesPerStep; microstepRes = microstepResolution; };
 
         void begin()
@@ -27,6 +27,7 @@ class StepDriver
             }
         };
 
+        // this normally should not be used, just use setVelocityCommand() instead.
         void setDirection(bool forwards)
         {
             digitalWrite(dirPin, forwards);
@@ -36,7 +37,7 @@ class StepDriver
         };
         
         // if you wish to set the velocity but not start outputting steps, set the second argument to false
-        void setVelocityCommand(double setVelocity, bool startAutomatically = true)
+        void setVelocityCommand(float setVelocity, bool startAutomatically = true)
         {
             // Convert velocity command to step frequency
             double stepFreq = abs(setVelocity) / (degPerStep / microstepRes);
@@ -64,7 +65,7 @@ class StepDriver
         uint8_t dirPin2 = -1;
         uint8_t stepPin2 = -1;
 
-        double degPerStep;
+        float degPerStep;
         uint64_t microstepRes;
 
         volatile bool stepPinState = false;
@@ -76,7 +77,7 @@ class StepDriver
                 return;
             }
             // Convert frequency to period in microseconds
-            double periodMicros = 1e6 / frequency / 2; // half period (toggle HIGH/LOW)
+            float periodMicros = 1e6 / frequency / 2; // half period (toggle HIGH/LOW)
 
             /*
             digitalWriteFast can change a pin's state far faster, 

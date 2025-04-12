@@ -6,31 +6,33 @@
 class sCurveProfiler
 {
     public:
-        sCurveProfiler(double maxVelocityDPS, double maxAccelDPS2, double maxJerkDPS3)
+        sCurveProfiler(){};
+        
+        void setLimits(float maxVelocityDPS, float maxAccelDPS2, float maxJerkDPS3)
             { maxVelocityLimit = maxVelocityDPS; maxAccelLimit = maxAccelDPS2; maxJerkLimit = maxJerkDPS3; };
 
-        void setTarget(double targetPosDegrees)
+        void setTarget(float targetPosDegrees)
             { target = targetPosDegrees; };
 
-        double getDesiredPosition() { return desiredPos; };
-        double getDesiredVelocity() { return desiredVel; };
-        double getDesiredAcceleration() { return desiredAccel; }; // don't use in most cases, as accel is indirectly controlled via velocity. here for logging / debugging purposes
+        float getDesiredPosition() { return desiredPos; };
+        float getDesiredVelocity() { return desiredVel; };
+        float getDesiredAcceleration() { return desiredAccel; }; // don't use in most cases, as accel is indirectly controlled via velocity. here for logging / debugging purposes
 
-        void update(double timeStep)
+        void update(float timeStep)
         {
             // as this is just a trajectory / motion profile generator, 
             // we don't care about the actual physical position of the system. 
             // we only care about our own internal state vector (desired[Pos,Vel,Accel])
             
-            double error = target - desiredPos;
+            float error = target - desiredPos;
             int8_t dir = (error >= 0) ? 1 : -1;
-            double absError = abs(error);
-            double stopDist = (desiredVel * desiredVel) / (2 * maxAccelLimit); // p = 1/2 v^2, hence the factor of 2 in the denominator
+            float absError = abs(error);
+            float stopDist = (desiredVel * desiredVel) / (2 * maxAccelLimit); // p = 1/2 v^2, hence the factor of 2 in the denominator
             // if it would take us more distance to slow down than our error, start slowing down
             // this profiler should be run with a tight enough timestep to prevent significant overshoot
             bool shouldSlowDown = stopDist >= absError; 
 
-            double desiredJerk = 0;
+            float desiredJerk = 0;
             // if we're at the point where we need to start slowing down, we want to apply negative jerk 
             // (and by extension negative accel and velocity)
             if(shouldSlowDown){ 
@@ -58,15 +60,15 @@ class sCurveProfiler
         };
 
     private:
-        double maxVelocityLimit; // Degrees per second
-        double maxAccelLimit; // degrees per second^2
-        double maxJerkLimit; // degrees per second^3
+        float maxVelocityLimit; // Degrees per second
+        float maxAccelLimit; // degrees per second^2
+        float maxJerkLimit; // degrees per second^3
 
-        double desiredPos = 0; // degrees
-        double desiredVel = 0; // degrees per second
-        double desiredAccel = 0; // degrees per second^2
+        float desiredPos = 0; // degrees
+        float desiredVel = 0; // degrees per second
+        float desiredAccel = 0; // degrees per second^2
 
-        double target; // degrees
+        float target; // degrees
 };
 
 #endif // sCurveProfiler_h

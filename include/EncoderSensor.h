@@ -6,12 +6,12 @@
 
 #include "Sensor.h"
 
-class EncoderSensor : Sensor
+class EncoderSensor : public Sensor
 {
     public:
-        EncoderSensor()
-            { Sensor(); };
-        void setPins(uint8_t PinA, uint8_t PinB, uint8_t LimitPin) override
+        EncoderSensor() = default;
+        void setSensorPins(uint8_t pin) override {}; // DO NOT USE, WILL NOT BE USED FOR ENCODER
+        void setSensorPins(uint8_t PinA, uint8_t PinB, uint8_t LimitPin) override
             { pinA = PinA; pinB = PinB; pinLimit = LimitPin; };
 
         uint8_t begin() override

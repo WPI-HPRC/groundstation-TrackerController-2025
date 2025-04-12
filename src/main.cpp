@@ -5,6 +5,8 @@
 // #define SUBSCALE
 // #define SIM // NOTE: this will be implemented in the future at some point. whether it will be HITL is TBD
 
+////////////////////////////////////////////////////////////////////// Includes //////////////////////////////////////////////////////////////////////
+
 // platform specific defines
 #ifdef REAL
   #include "Constants/ConstantsReal.h"
@@ -17,23 +19,163 @@
 // axis controller code
 #include "AxisController.h"
 
+// stepper driver code
+#include "StepDriver.h"
+
 // positional feedback code
 #include "EncoderSensor.h"
+#include "PotSensor.h"
 
 // this handles our interfacing to the outside world
-#include "StreamInterface.h"
+// #include "StreamInterface.h"
 
+// temporary serial interface code for tuning / bringup
+#include "TunerInterface.h"
 
+////////////////////////////////////////////////////////////////////// Global Objects //////////////////////////////////////////////////////////////////////
 
 // hardware declerations for azimuth axis
-// Sensor encoderSensor = EncoderSensor();
-// encoderSensor.setPins(azimuthEncoderA, azimuthEncoderB, azimuthLimitSwitch);
-    // TO:DO fix "inaccessible base"
+Sensor* azimuthSensor = new EncoderSensor();
+StepDriver azimuthMotorDriver;
 
+// motion controller defs for the azimuth axis
+AxisController azimuthController(&azimuthMotorDriver, azimuthEnable, azimuthSensor);
 
-void setup() {
+// hardware declerations for elevation axis
+Sensor* elevationSensor = new PotSensor();
+StepDriver elevationMotorDriver;
+
+// motion controller defs for the elevation axis
+AxisController elevationController(&elevationMotorDriver, elevationEnable, elevationSensor);
+
+// tuning interface
+TunerInterface tuner(&Serial);
+
+////////////////////////////////////////////////////////////////////// Local Function Declarations //////////////////////////////////////////////////////////////////////
+
+void configureHardware(); // provides pin mappings and tuning parameters to objects
+
+// tuner application related functions
+void runTuner();
+void calculateVelAccel(float actualPos);
+void sendTunerData(float desiredPos, float actualPos, float desiredVel, float actualVelocity, float desiredAcc, float actualAccel);
+
+////////////////////////////////////////////////////////////////////// setup() //////////////////////////////////////////////////////////////////////
+
+void setup() 
+{
+  configureHardware(); // setup pins and tuning parameters for 
+
+  // start actual things
+  azimuthController.begin();
+  elevationController.begin();
+
+  Serial.begin(115200);
+  while(!Serial){} // wait for connection
 }
 
-void loop() {
+////////////////////////////////////////////////////////////////////// loop() //////////////////////////////////////////////////////////////////////
+
+// select controller for tuning
+AxisController tuningController = azimuthController;
+Sensor* tuningSensor = azimuthSensor;
+// AxisController tuningController = elevationController;
+// Sensor* tuningSensor = elevationSensor;
+
+void loop() 
+{
   // put your main code here, to run repeatedly:
+
+  // update our tuner application
+  runTuner();
+}
+
+
+////////////////////////////////////////////////////////////////////// Local Function Definitions //////////////////////////////////////////////////////////////////////
+
+void configureHardware()
+{
+  // configure azimuth hardware
+  azimuthSensor->setSensorPins(azimuthEncoderA, azimuthEncoderB, azimuthLimitSwitch);
+  azimuthSensor->setPhysicalConversionConstant(azimuthConversionRatio);
+  azimuthMotorDriver.setPins(azimuthDirection, azimuthStep);
+  azimuthMotorDriver.setPhysicalConstants(DegreesPerStep, microStepResolution);
+
+  // configure azimuth motion controller
+  azimuthController.setPhysicalLimits(azimuthMaxVelocity, azimuthMaxAcceleration, azimuthMaxJerk);
+  azimuthController.setTuningParameters(azimuthkP, azimuthkD, 0.0, azimuthAcceptableError);
+  azimuthController.setLoopTimeStep(timeStep);
+
+  // configure elevation hardware
+  elevationSensor->setSensorPins(elevationPotentiometer);
+  elevationSensor->setPhysicalConversionConstant(elevationConversionRatio);
+  elevationMotorDriver.setPins(elevationDirection, elevationStep, elevationDirection2, elevationStep2);
+  elevationMotorDriver.setPhysicalConstants(DegreesPerStep, microStepResolution);
+
+  // configure elevation motion controller
+  elevationController.setPhysicalLimits(elevationMaxVelocity, elevationMaxAcceleration, elevationMaxJerk);
+  elevationController.setTuningParameters(elevationkP, elevationkD, elevationGravityCompFactor, elevationAcceptableError);
+  elevationController.setLoopTimeStep(timeStep);
+}
+
+
+float actualVel;
+float actualAcc;
+void runTuner()
+{
+  // check for tuner updates
+  tuner.readSerial();
+  if(tuner.newData()){
+    while(!tuningController.smoothStopController()){};
+    tuningController.setPhysicalLimits(tuner.getMaxVel(), tuner.getMaxAccel(), tuner.getMaxJerk());
+    tuningController.setTuningParameters(tuner.getKP(), tuner.getKD(), tuner.getGravFF(), tuner.getAcceptableError());
+    tuningController.setHoldBehavior(tuner.getBrake() ? HoldBehavior::brakeMode : HoldBehavior::coastMode);
+    // now that we've applied our new stuff, we can re-enable the controller
+    tuningController.startController();
+    // now give it a target
+    tuningController.setTarget(tuner.getTarget());
+  }
+
+
+  // send data to tuner
+  calculateVelAccel(tuningSensor->getDistFrom0());
+  sendTunerData(tuningController.motionProfiler.getDesiredPosition(), tuningSensor->getDistFrom0(),
+                tuningController.motionProfiler.getDesiredVelocity(), actualVel,
+                tuningController.motionProfiler.getDesiredAcceleration(), actualAcc);
+}
+
+
+
+
+float prevPos;
+float prevVel;
+unsigned long prevTime = 0;
+void calculateVelAccel(float actualPos)
+{
+  unsigned long currentTime = millis();
+  float dt = (currentTime - prevTime) / 1000.0;  // Time difference in seconds
+
+  // Update actual velocity and acceleration
+  actualVel = (actualPos - prevPos) / dt;  // Velocity = (position change) / (time change)
+  actualAcc = (actualVel - prevVel) / dt;  // Acceleration = (velocity change) / (time change)
+
+  // Update previous values for next calculation
+  prevTime = currentTime;
+  prevPos = actualPos;
+  prevVel = actualVel;
+}
+
+void sendTunerData(float desiredPos, float actualPos, float desiredVel, float actualVelocity, float desiredAcc, float actualAccel)
+{
+  // Create a formatted string with all the data
+  String message = "MOTION_DATA,";
+  message += String(desiredPos, 4) + ",";
+  message += String(actualPos, 4) + ",";
+  message += String(desiredVel, 4) + ",";
+  message += String(actualVelocity, 4) + ",";
+  message += String(desiredAcc, 4) + ",";
+  message += String(actualAccel, 4);
+
+  // Send the message over serial
+  Serial.println(message);
 }
