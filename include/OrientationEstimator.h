@@ -31,11 +31,20 @@ class OrientationEstimator
 
         Orientation getOrientation() { return orientation; };
 
+        // prints in degrees
         void debugPrint(Stream* printInterface)
         {
-            printInterface->print("Pitch: "); printInterface->print(orientation.pitch, 4); printInterface->print(", ");
-            printInterface->print("Roll: "); printInterface->print(orientation.roll, 4); printInterface->print(", ");
-            printInterface->print("Yaw: "); printInterface->print(orientation.yaw, 4); printInterface->println();
+            printInterface->print("Pitch: "); printInterface->print(orientation.pitch*RAD_TO_DEG, 4); printInterface->print(", ");
+            printInterface->print("Roll: "); printInterface->print(orientation.roll*RAD_TO_DEG, 4); printInterface->print(", ");
+            printInterface->print("Yaw: "); printInterface->print(orientation.yaw*RAD_TO_DEG, 4); printInterface->println();
+        }
+
+        // pitch, roll, yaw
+        void visualizationPrint(Stream* printInterface)
+        {
+            printInterface->print(orientation.pitch*RAD_TO_DEG, 4); printInterface->print(",");
+            printInterface->print(orientation.roll*RAD_TO_DEG, 4); printInterface->print(",");
+            printInterface->print(orientation.yaw*RAD_TO_DEG, 4); printInterface->println();
         }
 
 
@@ -44,7 +53,7 @@ class OrientationEstimator
 
         Orientation orientation;
 
-        float xMagOffset, yMagOffset;
+        float xMagOffset, yMagOffset = 0.0;
 
         void derive()
         {

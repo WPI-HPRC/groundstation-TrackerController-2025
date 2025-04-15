@@ -126,8 +126,12 @@ void loop()
   // test IMU code
   orientationEstimator.update();
 
+  // imu.update();
+  digitalWrite(LED_BUILTIN, HIGH);
+
   // orientationEstimator.debugPrint(&SerialUSB);
-  imu.debugPrint(&SerialUSB);
+  orientationEstimator.visualizationPrint(&SerialUSB);
+  // imu.debugPrint(&SerialUSB);
 
   delay(10);
   
