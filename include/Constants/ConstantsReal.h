@@ -61,6 +61,9 @@ constexpr double elevationConversionRatio ( (elevationMaximumAngle-elevationMini
 constexpr double azimuthConversionRatio ( (360/azimuthEncoderTicksPerRev) * (azimuthEncoderPinionTeeth / azimuthMainGearTeeth) ); // encoder ticks to degrees
 
 
+constexpr double XMagHardIronOffset = 0.0;
+constexpr double YMagHardIronOffset = 0.0;
+
 ////////////////////////////////////////////////////////////////////// Pins //////////////////////////////////////////////////////////////////////
 
 #define LED_POLARIS 6

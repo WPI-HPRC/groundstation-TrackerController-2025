@@ -6,7 +6,7 @@
 // #define SIM // NOTE: this will be implemented in the future at some point. whether it will be HITL is TBD
 
 ////////////////////////////////////////////////////////////////////// Includes //////////////////////////////////////////////////////////////////////
- 
+
 // platform specific defines
 #ifdef REAL
   #include "Constants/ConstantsReal.h"
@@ -28,6 +28,7 @@
 
 // IMU code
 #include "IMU.h"
+#include "OrientationEstimator.h"
 
 // this handles our interfacing to the outside world
 // #include "StreamInterface.h"
@@ -54,6 +55,9 @@ AxisController elevationController(&elevationMotorDriver, elevationEnable, eleva
 // IMU abstraction object over both chips for accel, gyro & mag
 IMU imu;
 
+// orientation estimation
+OrientationEstimator orientationEstimator(&imu);
+
 // tuning interface
 TunerInterface tuner(&Serial);
 
@@ -70,11 +74,12 @@ void sendTunerData(float desiredPos, float actualPos, float desiredVel, float ac
 
 void setup() 
 {
-  // configureHardware(); // setup pins and tuning parameters for 
+  configureHardware(); // setup pins and tuning parameters for 
 
   // start actual things
   // azimuthController.begin();
   // elevationController.begin();
+  orientationEstimator.begin();
 
   SerialUSB.begin(115200);
   // while(!Serial){} // wait for connection
@@ -83,7 +88,7 @@ void setup()
   digitalWrite(LED_BUILTIN, LOW);
   digitalWrite(6, LOW);
 
-  imu.begin();
+  
 }
 
 ////////////////////////////////////////////////////////////////////// loop() //////////////////////////////////////////////////////////////////////
@@ -100,8 +105,9 @@ void loop()
   // runTuner();
 
   // test IMU code
-  
-  imu.update();
+  orientationEstimator.update();
+
+  // orientationEstimator.debugPrint(&SerialUSB);
   imu.debugPrint(&SerialUSB);
 
   delay(10);
@@ -135,6 +141,9 @@ void configureHardware()
   elevationController.setPhysicalLimits(elevationMaxVelocity, elevationMaxAcceleration, elevationMaxJerk);
   elevationController.setTuningParameters(elevationkP, elevationkD, elevationGravityCompFactor, elevationAcceptableError);
   elevationController.setLoopTimeStep(timeStep);
+
+  // configure IMU orientation offset
+  orientationEstimator.setCalibrationOffsets(XMagHardIronOffset, YMagHardIronOffset);
 }
 
 
