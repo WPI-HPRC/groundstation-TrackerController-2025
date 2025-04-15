@@ -6,7 +6,7 @@
 // #define SIM // NOTE: this will be implemented in the future at some point. whether it will be HITL is TBD
 
 ////////////////////////////////////////////////////////////////////// Includes //////////////////////////////////////////////////////////////////////
-
+ 
 // platform specific defines
 #ifdef REAL
   #include "Constants/ConstantsReal.h"
