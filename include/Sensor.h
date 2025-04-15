@@ -14,6 +14,8 @@ class Sensor
 
         virtual uint8_t begin();
         virtual uint8_t update();
+
+        bool isZeroed() { return zeroed; };
         
         // returns in the unit specified by your conversion constant
         float getDistFrom0()
@@ -26,4 +28,6 @@ class Sensor
         int64_t zeroPos;
 
         float conversionConstant;
+
+        bool zeroed;
 };

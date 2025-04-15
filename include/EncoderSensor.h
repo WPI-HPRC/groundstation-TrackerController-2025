@@ -17,6 +17,7 @@ class EncoderSensor : public Sensor
         {
             encoder = Encoder(pinA, pinB);
             pinMode(pinLimit, INPUT_PULLUP);
+            zeroed = false;
             return 0;
         };
 
@@ -27,6 +28,7 @@ class EncoderSensor : public Sensor
             if(digitalRead(pinLimit) == LOW){
                 zeroPos = currentPos;
                 return 1; 
+                zeroed = true;
             }
 
             return 0;

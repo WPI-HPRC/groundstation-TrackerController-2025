@@ -26,6 +26,9 @@ class PotSensor : public Sensor
             pinMode(analogPin, INPUT_DISABLE); 
             
             analogReadResolution(10); // 0-1023, we are specifiying it to be safe
+            update();
+            zeroed = true;
+
             return 0;
         };
 
