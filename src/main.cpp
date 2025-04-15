@@ -74,19 +74,25 @@ void sendTunerData(float desiredPos, float actualPos, float desiredVel, float ac
 
 void setup() 
 {
-  configureHardware(); // setup pins and tuning parameters for 
+  pinMode(LED_BUILTIN, OUTPUT);
+  pinMode(LED_POLARIS, OUTPUT);
+  digitalWrite(LED_BUILTIN, LOW);
+  digitalWrite(LED_POLARIS, LOW);
+
+  SerialUSB.begin(115200);
+  // while(!Serial){} // wait for connection
+
+  // configureHardware(); // setup pins and tuning parameters for 
 
   // start actual things
   // azimuthController.begin();
   // elevationController.begin();
-  orientationEstimator.begin();
+  bool imuStatus = orientationEstimator.begin();
+  // bool imuStatus = imu.begin();
 
-  SerialUSB.begin(115200);
-  // while(!Serial){} // wait for connection
-  pinMode(LED_BUILTIN, OUTPUT);
-  pinMode(6, OUTPUT);
-  digitalWrite(LED_BUILTIN, LOW);
-  digitalWrite(6, LOW);
+  digitalWrite(LED_POLARIS, imuStatus);
+
+  
 
   
 }
@@ -107,8 +113,12 @@ void loop()
   // test IMU code
   orientationEstimator.update();
 
+  // imu.update();
+  digitalWrite(LED_BUILTIN, HIGH);
+
   // orientationEstimator.debugPrint(&SerialUSB);
-  imu.debugPrint(&SerialUSB);
+  orientationEstimator.visualizationPrint(&SerialUSB);
+  // imu.debugPrint(&SerialUSB);
 
   delay(10);
   
