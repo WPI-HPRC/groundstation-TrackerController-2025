@@ -18,7 +18,7 @@ Within the tracker, the "body" frame describes the orientation of the clamping a
 * Z+ is defined in respect to the previous two axes, in a standard right-hand cartesian coordinate frame. 
     * The plane of the clamping assembly that is in the direction of Z+ should be the plane that any antenna should be attached to.
 * The origin of this coordinate system is placed in the center of the axle that the clamping assembly rides on in X & Z, and placed center within the clamping assembly in Y.
-
+    
 
 ## Seperation of responsibilities:
 

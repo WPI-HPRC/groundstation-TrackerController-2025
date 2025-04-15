@@ -1,5 +1,4 @@
-#ifndef sCurveProfiler_h
-#define sCurveProfiler_h
+#pragma once
 
 #include <Arduino.h>
 
@@ -70,5 +69,3 @@ class sCurveProfiler
 
         float target; // degrees
 };
-
-#endif // sCurveProfiler_h

@@ -1,5 +1,4 @@
-#ifndef Sensor_h
-#define Sensor_h
+#pragma once
 
 #include <Arduino.h>
 
@@ -28,5 +27,3 @@ class Sensor
 
         float conversionConstant;
 };
-
-#endif // Sensor_h

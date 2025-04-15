@@ -1,5 +1,4 @@
-#ifndef TUNING_RECEIVER_H
-#define TUNING_RECEIVER_H
+#pragma once
 
 #include <Arduino.h>
 
@@ -74,5 +73,3 @@ private:
     float target;
     float error;
 };
-
-#endif

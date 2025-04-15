@@ -1,5 +1,4 @@
-#ifndef AxisController_h
-#define AxisController_h
+#pragma once
 
 #include <Arduino.h>
 #include <TeensyTimerTool.h>
@@ -171,5 +170,3 @@ class AxisController
             }
         }
 };
-#endif // AxisController_h
-

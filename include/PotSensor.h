@@ -1,5 +1,4 @@
-#ifndef PotSensor_h
-#define PotSensor_h
+#pragma once
 
 #include <Arduino.h>
 
@@ -40,5 +39,3 @@ class PotSensor : public Sensor
     private:
         uint8_t analogPin;
 };
-
-#endif // PotSensor_h

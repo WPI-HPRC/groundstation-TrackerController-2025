@@ -1,5 +1,4 @@
-#ifndef EncoderSensor_h
-#define EncoderSensor_h
+#pragma once
 
 #include <Arduino.h>
 #include <Encoder.h>
@@ -42,5 +41,3 @@ class EncoderSensor : public Sensor
         Encoder encoder = Encoder(-1,-1);
 
 };
-
-#endif // EncoderSensor_h

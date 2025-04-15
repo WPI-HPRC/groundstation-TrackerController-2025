@@ -1,5 +1,4 @@
-#ifndef ConstantsReal_h
-#define ConstantsReal_h
+#pragma once
 
 ////////////////////////////////////////////////////////////////////// Tuning Parameters //////////////////////////////////////////////////////////////////////
 
@@ -80,6 +79,3 @@ const uint8_t elevationDirection = 8;
 const uint8_t elevationStep2 = 10;
 const uint8_t elevationDirection2 = 11;
 const uint8_t elevationEnable = 12;
-
-
-#endif // ConstantsReal_h

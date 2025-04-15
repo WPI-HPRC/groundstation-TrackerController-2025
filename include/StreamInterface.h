@@ -1,5 +1,4 @@
-#ifndef StreamInterface_h
-#define StreamInterface_h
+#pragma once
 
 #include <Arduino.h>
 
@@ -13,6 +12,3 @@ class StreamInterface
 
 
 };
-
-
-#endif // StreamInterface_h

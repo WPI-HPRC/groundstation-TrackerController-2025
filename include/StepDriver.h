@@ -1,5 +1,4 @@
-#ifndef StepDriver_h
-#define StepDriver_h
+#pragma once
 
 #include <Arduino.h>
 #include <TeensyTimerTool.h>
@@ -101,5 +100,3 @@ class StepDriver
             }
         }
 };
-
-#endif // StepDriver_h
