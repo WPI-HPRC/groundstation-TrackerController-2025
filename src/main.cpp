@@ -6,7 +6,7 @@
 // #define SIM // NOTE: this will be implemented in the future at some point. whether it will be HITL is TBD
 
 ////////////////////////////////////////////////////////////////////// Includes //////////////////////////////////////////////////////////////////////
- 
+
 // platform specific defines
 #ifdef REAL
   #include "Constants/ConstantsReal.h"
@@ -28,6 +28,7 @@
 
 // IMU code
 #include "IMU.h"
+#include "OrientationEstimator.h"
 
 // this handles our interfacing to the outside world
 // #include "StreamInterface.h"
@@ -53,6 +54,9 @@ AxisController elevationController(&elevationMotorDriver, elevationEnable, eleva
 
 // IMU abstraction object over both chips for accel, gyro & mag
 IMU imu;
+
+// orientation estimation
+OrientationEstimator orientationEstimator(&imu);
 
 // tuning interface
 TunerInterface tuner(&SerialUSB);
@@ -87,6 +91,7 @@ void setup()
   // start actual things
   azimuthController.begin();  
   elevationController.begin();
+  orientationEstimator.begin();
 
   // start LEDS
   pinMode(LED_BUILTIN, OUTPUT);
@@ -115,6 +120,18 @@ Sensor* tuningSensor = azimuthSensor;
 // as everything is run through timers, loop goes unused
 void loop() 
 {
+  // update our tuner application
+  // runTuner();
+
+  // test IMU code
+  orientationEstimator.update();
+
+  // orientationEstimator.debugPrint(&SerialUSB);
+  imu.debugPrint(&SerialUSB);
+
+  delay(10);
+  
+
 }
 
 
@@ -155,6 +172,9 @@ void configureHardware()
   elevationController.setTuningParameters(elevationFF, elevationkP, elevationkD, elevationGravityCompFactor, elevationAcceptableError, elevationAcceptableVelocityError);
   elevationController.setLoopTimeStep(controlLoopTimeStep);
 
+
+  // configure IMU orientation offset
+  orientationEstimator.setCalibrationOffsets(XMagHardIronOffset, YMagHardIronOffset);
 }
 
 
