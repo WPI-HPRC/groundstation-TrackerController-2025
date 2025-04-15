@@ -63,19 +63,21 @@ constexpr double azimuthConversionRatio ( (360/azimuthEncoderTicksPerRev) * (azi
 
 ////////////////////////////////////////////////////////////////////// Pins //////////////////////////////////////////////////////////////////////
 
-const uint8_t azimuthEncoderA = 1;
-const uint8_t azimuthEncoderB = 2;
+#define LED_POLARIS 6
 
-const uint8_t azimuthLimitSwitch = 3;
+const uint8_t azimuthEncoderA = 32;
+const uint8_t azimuthEncoderB = 33;
 
-const uint8_t azimuthStep = 4;
-const uint8_t azimuthDirection = 5;
-const uint8_t azimuthEnable = 6;
+const uint8_t azimuthLimitSwitch = 9;
 
-const uint8_t elevationPotentiometer = 7;
+const uint8_t azimuthStep = 12;
+const uint8_t azimuthDirection = 11;
+const uint8_t azimuthEnable = 10;
 
-const uint8_t elevationStep = 8;
-const uint8_t elevationDirection = 8;
-const uint8_t elevationStep2 = 10;
-const uint8_t elevationDirection2 = 11;
-const uint8_t elevationEnable = 12;
+const uint8_t elevationPotentiometer = 21;
+
+const uint8_t elevationStep = 25;
+const uint8_t elevationDirection = 24;
+const uint8_t elevationStep2 = 7;
+const uint8_t elevationDirection2 = 8;
+const uint8_t elevationEnable = 20;

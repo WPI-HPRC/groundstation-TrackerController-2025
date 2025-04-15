@@ -26,6 +26,9 @@
 #include "EncoderSensor.h"
 #include "PotSensor.h"
 
+// IMU code
+#include "IMU.h"
+
 // this handles our interfacing to the outside world
 // #include "StreamInterface.h"
 
@@ -48,6 +51,9 @@ StepDriver elevationMotorDriver;
 // motion controller defs for the elevation axis
 AxisController elevationController(&elevationMotorDriver, elevationEnable, elevationSensor);
 
+// IMU abstraction object over both chips for accel, gyro & mag
+IMU imu;
+
 // tuning interface
 TunerInterface tuner(&Serial);
 
@@ -64,14 +70,20 @@ void sendTunerData(float desiredPos, float actualPos, float desiredVel, float ac
 
 void setup() 
 {
-  configureHardware(); // setup pins and tuning parameters for 
+  // configureHardware(); // setup pins and tuning parameters for 
 
   // start actual things
-  azimuthController.begin();
-  elevationController.begin();
+  // azimuthController.begin();
+  // elevationController.begin();
 
-  Serial.begin(115200);
-  while(!Serial){} // wait for connection
+  SerialUSB.begin(115200);
+  // while(!Serial){} // wait for connection
+  pinMode(LED_BUILTIN, OUTPUT);
+  pinMode(6, OUTPUT);
+  digitalWrite(LED_BUILTIN, LOW);
+  digitalWrite(6, LOW);
+
+  imu.begin();
 }
 
 ////////////////////////////////////////////////////////////////////// loop() //////////////////////////////////////////////////////////////////////
@@ -81,13 +93,20 @@ AxisController tuningController = azimuthController;
 Sensor* tuningSensor = azimuthSensor;
 // AxisController tuningController = elevationController;
 // Sensor* tuningSensor = elevationSensor;
-
+bool ledState;
 void loop() 
 {
-  // put your main code here, to run repeatedly:
-
   // update our tuner application
-  runTuner();
+  // runTuner();
+
+  // test IMU code
+  
+  imu.update();
+  imu.debugPrint(&SerialUSB);
+
+  delay(10);
+  
+
 }
 
 
