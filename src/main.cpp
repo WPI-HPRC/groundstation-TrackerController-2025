@@ -55,7 +55,7 @@ AxisController elevationController(&elevationMotorDriver, elevationEnable, eleva
 IMU imu;
 
 // tuning interface
-TunerInterface tuner(&Serial);
+TunerInterface tuner(&SerialUSB);
 
 ////////////////////////////////////////////////////////////////////// Local Function Declarations //////////////////////////////////////////////////////////////////////
 
@@ -70,20 +70,22 @@ void sendTunerData(float desiredPos, float actualPos, float desiredVel, float ac
 
 void setup() 
 {
-  // configureHardware(); // setup pins and tuning parameters for 
-
-  // start actual things
-  // azimuthController.begin();
-  // elevationController.begin();
-
   SerialUSB.begin(115200);
   // while(!Serial){} // wait for connection
-  pinMode(LED_BUILTIN, OUTPUT);
-  pinMode(6, OUTPUT);
-  digitalWrite(LED_BUILTIN, LOW);
-  digitalWrite(6, LOW);
 
-  imu.begin();
+  configureHardware(); // setup pins and tuning parameters for controllers
+
+  // start actual things
+  azimuthController.begin();  
+  elevationController.begin();
+
+  // start LEDS
+  pinMode(LED_BUILTIN, OUTPUT);
+  pinMode(LED_POLARIS, OUTPUT);
+  digitalWrite(LED_BUILTIN, LOW);
+  digitalWrite(LED_POLARIS, LOW);
+
+  // imu.begin();
 }
 
 ////////////////////////////////////////////////////////////////////// loop() //////////////////////////////////////////////////////////////////////
@@ -100,11 +102,18 @@ void loop()
   // runTuner();
 
   // test IMU code
+
+  digitalWrite(LED_POLARIS, ledState);
+  ledState = !ledState;
+  // SerialUSB.println("running!");
   
-  imu.update();
-  imu.debugPrint(&SerialUSB);
+  // imu.update();
+  // imu.debugPrint(&SerialUSB);
+  // azimuthController.startController();
 
   delay(10);
+
+  // print the pot
   
 
 }
@@ -135,6 +144,7 @@ void configureHardware()
   elevationController.setPhysicalLimits(elevationMaxVelocity, elevationMaxAcceleration, elevationMaxJerk);
   elevationController.setTuningParameters(elevationkP, elevationkD, elevationGravityCompFactor, elevationAcceptableError);
   elevationController.setLoopTimeStep(timeStep);
+
 }
 
 

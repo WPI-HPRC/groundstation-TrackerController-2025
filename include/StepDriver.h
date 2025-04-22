@@ -31,7 +31,7 @@ class StepDriver
         {
             digitalWrite(dirPin, forwards);
             if(doubleDriver){
-                digitalWrite(dirPin2, forwards);
+                digitalWrite(dirPin2, !forwards);
             }
         };
         

@@ -31,8 +31,8 @@ class AxisController
         void setLoopTimeStep(float timeStepUs)
         { 
             timeStep = timeStepUs;
-            controlLoopTimer.setPeriod(timeStep);
-            controlLoopTimer.setNextPeriod(timeStep); // why do we have to do it twice?? idk, library quirk
+            // controlLoopTimer.setPeriod(timeStep);
+            // controlLoopTimer.setNextPeriod(timeStep); // why do we have to do it twice?? idk, library quirk
         };
 
         void updateLoop()
@@ -47,8 +47,9 @@ class AxisController
 
             // constrain it to be within our maximum allowable velocity
             velocityCommand = constrain(velocityCommand, -maxVelocityLimit, maxVelocityLimit);
-
-            driver->setVelocityCommand(velocityCommand);
+            if(enabled){
+                driver->setVelocityCommand(velocityCommand);
+            }
 
             reachedGoal = ( fabs(error) < acceptableError);
         };
@@ -58,16 +59,18 @@ class AxisController
             sensor->begin();
             driver->begin();
             pinMode(enablePin, OUTPUT);
-
+            setHoldBehavior(HoldBehavior::coastMode); // begin in a disabled state for on-boot calibration
+            applyHoldBehavior(getHoldBehavior());            
+            
             controlLoopTimer.begin([this]() { this->updateLoop(); }, timeStep, false); // in µs
+
             
             return 0;
         };
 
-        void setHoldBehavior(HoldBehavior behavior){ desiredHoldBehavior = behavior; };
+        void setHoldBehavior(HoldBehavior behavior) { desiredHoldBehavior = behavior; };
 
-        HoldBehavior getHoldBehavior()
-            { return desiredHoldBehavior; };
+        HoldBehavior getHoldBehavior() { return desiredHoldBehavior; };
 
         // this will take control over the axis using the controller. 
         // this bypasses the hold behavior set by setHoldBehavior()
