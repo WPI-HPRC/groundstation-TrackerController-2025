@@ -32,6 +32,12 @@ class PotSensor : public Sensor
             return 0;
         };
 
+        void debugPrint(Stream *printInterface)
+        {
+            printInterface->print("Current Position: "); printInterface->print(getDistFrom0()); printInterface->print(", ");
+            printInterface->print("Pot reading: "); printInterface->print(currentPos); printInterface->println();
+        }
+
         // returns 0 in all cases
         uint8_t update() override
         {
@@ -39,6 +45,11 @@ class PotSensor : public Sensor
             return 0;
         }
 
+        float getDistFrom0()
+            { return (currentPos - zeroPos) * conversionConstant; }; // sensors should use their raw value internally, and we only convert to the desired unit with the conversion constant before we give it to the user
+
     private:
         uint8_t analogPin;
+
+        int64_t minimumValue;
 };

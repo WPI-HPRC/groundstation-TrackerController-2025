@@ -15,7 +15,7 @@ class EncoderSensor : public Sensor
 
         uint8_t begin() override
         {
-            encoder = Encoder(pinA, pinB);
+            encoder.begin(pinA, pinB);
             pinMode(pinLimit, INPUT_PULLUP);
             zeroed = false;
             return 0;
@@ -26,13 +26,21 @@ class EncoderSensor : public Sensor
         {
             currentPos = encoder.read() - zeroPos;
             if(digitalRead(pinLimit) == LOW){
-                zeroPos = currentPos;
-                return 1; 
-                zeroed = true;
+                setZero(currentPos);
+                return 1;
             }
 
             return 0;
         }
+
+        void debugPrint(Stream *printInterface)
+        {
+            printInterface->print("Current Position: "); printInterface->print(currentPos); printInterface->print(", ");
+            printInterface->print("Zero Position: "); printInterface->print(zeroPos); printInterface->print(", ");
+            printInterface->print("Encoder Ticks: "); printInterface->print(encoder.read()); printInterface->print(", ");
+            printInterface->print("Limit Switch State: "); printInterface->print(digitalRead(pinLimit)); printInterface->println("");
+        }
+
 
     private:
         uint8_t pinA;
@@ -40,6 +48,6 @@ class EncoderSensor : public Sensor
 
         uint8_t pinLimit;
 
-        Encoder encoder = Encoder(-1,-1);
+        Encoder encoder = Encoder();
 
 };

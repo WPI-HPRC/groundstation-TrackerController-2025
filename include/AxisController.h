@@ -37,6 +37,7 @@ class AxisController
 
         void updateLoop()
         {
+            sensor->update(); // run an update loop for our sensor so we chilling on position
             motionProfiler.update(timeStep); // update our motion profiler so we can get the new desired pos/vel data
 
             float error = motionProfiler.getDesiredPosition() - sensor->getDistFrom0();

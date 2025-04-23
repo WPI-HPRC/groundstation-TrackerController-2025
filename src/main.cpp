@@ -96,24 +96,51 @@ Sensor* tuningSensor = azimuthSensor;
 // AxisController tuningController = elevationController;
 // Sensor* tuningSensor = elevationSensor;
 bool ledState;
+unsigned long lastLEDtime = 0;
+unsigned long lastPrintTime = 0;
+bool firstRun = true;
 void loop() 
 {
   // update our tuner application
   // runTuner();
 
   // test IMU code
-
-  digitalWrite(LED_POLARIS, ledState);
-  ledState = !ledState;
+  if(millis() - lastLEDtime > 1000){
+    ledState = !ledState;  
+    digitalWrite(LED_POLARIS, ledState);
+    lastLEDtime = millis();
+  }
   // SerialUSB.println("running!");
   
   // imu.update();
   // imu.debugPrint(&SerialUSB);
   // azimuthController.startController();
 
-  delay(10);
+ 
 
-  // print the pot
+  // temp update sensors (actually updated inside AxisController)
+  azimuthSensor->update();
+  elevationSensor->update();
+  
+  if(firstRun){
+    firstRun = false;
+    azimuthMotorDriver.setVelocityCommand(10);
+    // azimuthController.setHoldBehavior(HoldBehavior::brakeMode);
+    digitalWrite(azimuthEnable, LOW);
+  }
+  if(azimuthSensor->isZeroed()){
+    azimuthMotorDriver.setVelocityCommand(0.0);
+    azimuthMotorDriver.stop();
+    SerialUSB.println("HOMED");
+  }
+  
+  if(millis() - lastPrintTime > 100){
+    
+    azimuthSensor->debugPrint(&SerialUSB);
+    // elevationSensor->debugPrint(&SerialUSB);
+    lastPrintTime = millis();
+  }
+  
   
 
 }
@@ -137,6 +164,7 @@ void configureHardware()
   // configure elevation hardware
   elevationSensor->setSensorPins(elevationPotentiometer);
   elevationSensor->setPhysicalConversionConstant(elevationConversionRatio);
+  elevationSensor->setZero(elevationMinimumValue); // we only do this for the elevation, azimuth zeroes itself
   elevationMotorDriver.setPins(elevationDirection, elevationStep, elevationDirection2, elevationStep2);
   elevationMotorDriver.setPhysicalConstants(DegreesPerStep, microStepResolution);
 

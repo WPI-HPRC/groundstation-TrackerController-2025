@@ -45,16 +45,15 @@ const float DegreesPerStep = 1.8f;
 ////////////////////////////////////////////////////////////////////// Sensor Calibration Values //////////////////////////////////////////////////////////////////////
 
 // must be determined emperically 
-const uint16_t elevationMinimumValue = 1024; // ADC reading value
-const uint16_t elevationMaximumValue = 0; // ADC reading value
+const uint16_t elevationMinimumValue = 37; // ADC reading value
+const uint16_t elevationMaximumValue = 754; // ADC reading value
 
 // must be determined/defined
-constexpr float elevationMaximumAngle = 90.0f; // degrees
-constexpr float elevationMinimumAngle = -90.0f; // degrees
-
-constexpr int16_t elevationZeroValue = (elevationMaximumValue - elevationMinimumValue) / 2 ;// ADC reading value
+constexpr float elevationMinimumAngle = 0.0f; // degrees
+constexpr float elevationMaximumAngle = 180.0f; // degrees
 
 // this assumes a linear relationship (which should be true since we bought linear pots)
+        // TO:DO - new pot is non-linear. we need to handle that. lookup table?
 constexpr double elevationConversionRatio ( (elevationMaximumAngle-elevationMinimumAngle) / (elevationMaximumValue-elevationMinimumValue) ); // adc readings to degrees
 
 // 360 degrees / ticks per revolution * gear ratio
@@ -70,11 +69,11 @@ const uint8_t azimuthEncoderB = 33;
 
 const uint8_t azimuthLimitSwitch = 9;
 
-const uint8_t azimuthStep = 12;
-const uint8_t azimuthDirection = 11;
+const uint8_t azimuthStep = 11;
+const uint8_t azimuthDirection = 12;
 const uint8_t azimuthEnable = 10;
 
-const uint8_t elevationPotentiometer = 21;
+const uint8_t elevationPotentiometer = 17;
 
 const uint8_t elevationStep = 25;
 const uint8_t elevationDirection = 24;
