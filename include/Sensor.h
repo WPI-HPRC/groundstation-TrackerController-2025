@@ -34,5 +34,5 @@ class Sensor
 
         float conversionConstant;
 
-        bool zeroed;
+        bool zeroed = false;
 };

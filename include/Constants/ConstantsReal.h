@@ -77,6 +77,6 @@ const uint8_t elevationPotentiometer = 17;
 
 const uint8_t elevationStep = 25;
 const uint8_t elevationDirection = 24;
-const uint8_t elevationStep2 = 7;
-const uint8_t elevationDirection2 = 8;
-const uint8_t elevationEnable = 20;
+const uint8_t elevationStep2 = 8;
+const uint8_t elevationDirection2 = 20;
+const uint8_t elevationEnable = 7;

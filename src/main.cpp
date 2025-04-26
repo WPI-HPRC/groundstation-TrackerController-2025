@@ -71,13 +71,19 @@ void sendTunerData(float desiredPos, float actualPos, float desiredVel, float ac
 void setup() 
 {
   SerialUSB.begin(115200);
-  // while(!Serial){} // wait for connection
+  while(!SerialUSB){} // wait for connection
 
   configureHardware(); // setup pins and tuning parameters for controllers
 
+  azimuthSensor->begin();
+  azimuthMotorDriver.begin();
+
+  elevationSensor->begin();
+  elevationMotorDriver.begin();
+
   // start actual things
-  azimuthController.begin();  
-  elevationController.begin();
+  // azimuthController.begin();  
+  // elevationController.begin();
 
   // start LEDS
   pinMode(LED_BUILTIN, OUTPUT);
@@ -99,6 +105,7 @@ bool ledState;
 unsigned long lastLEDtime = 0;
 unsigned long lastPrintTime = 0;
 bool firstRun = true;
+bool firstPrint = true;
 void loop() 
 {
   // update our tuner application
@@ -114,34 +121,41 @@ void loop()
   
   // imu.update();
   // imu.debugPrint(&SerialUSB);
-  // azimuthController.startController();
 
  
-
   // temp update sensors (actually updated inside AxisController)
   azimuthSensor->update();
   elevationSensor->update();
+
+  // digitalWrite(LED_BUILTIN, azimuthSensor->isZeroed());
   
   if(firstRun){
     firstRun = false;
-    azimuthMotorDriver.setVelocityCommand(10);
+    
     // azimuthController.setHoldBehavior(HoldBehavior::brakeMode);
     digitalWrite(azimuthEnable, LOW);
+    digitalWrite(elevationEnable, HIGH);
+    delay(10);
+    // azimuthMotorDriver.setVelocityCommand(1);
+    elevationMotorDriver.setVelocityCommand(-8);
   }
-  if(azimuthSensor->isZeroed()){
-    azimuthMotorDriver.setVelocityCommand(0.0);
-    azimuthMotorDriver.stop();
-    SerialUSB.println("HOMED");
-  }
+
+
+  // if(azimuthSensor->update() == 1){
+  //   azimuthMotorDriver.setVelocityCommand(0.0);
+  //   azimuthMotorDriver.stop();
+  //   if(firstPrint){
+  //     SerialUSB.println("HOMED");
+  //     firstPrint = false;
+  //   }
+  // }
   
   if(millis() - lastPrintTime > 100){
     
-    azimuthSensor->debugPrint(&SerialUSB);
+    // azimuthSensor->debugPrint(&SerialUSB);
     // elevationSensor->debugPrint(&SerialUSB);
     lastPrintTime = millis();
   }
-  
-  
 
 }
 
@@ -200,9 +214,6 @@ void runTuner()
                 tuningController.motionProfiler.getDesiredVelocity(), actualVel,
                 tuningController.motionProfiler.getDesiredAcceleration(), actualAcc);
 }
-
-
-
 
 float prevPos;
 float prevVel;

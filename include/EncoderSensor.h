@@ -25,7 +25,8 @@ class EncoderSensor : public Sensor
         uint8_t update() override
         {
             currentPos = encoder.read() - zeroPos;
-            if(digitalRead(pinLimit) == LOW){
+            if(!digitalRead(pinLimit)){
+                SerialUSB.println("ZEROING");
                 setZero(currentPos);
                 return 1;
             }
