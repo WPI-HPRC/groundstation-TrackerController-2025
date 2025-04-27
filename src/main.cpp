@@ -136,23 +136,23 @@ void loop()
     digitalWrite(azimuthEnable, LOW);
     digitalWrite(elevationEnable, HIGH);
     delay(10);
-    // azimuthMotorDriver.setVelocityCommand(1);
-    elevationMotorDriver.setVelocityCommand(-8);
+    azimuthMotorDriver.setVelocityCommand(-1);
+    elevationMotorDriver.setVelocityCommand(-2);
   }
 
 
-  // if(azimuthSensor->update() == 1){
-  //   azimuthMotorDriver.setVelocityCommand(0.0);
-  //   azimuthMotorDriver.stop();
-  //   if(firstPrint){
-  //     SerialUSB.println("HOMED");
-  //     firstPrint = false;
-  //   }
-  // }
+  if(azimuthSensor->update() == 1){
+    azimuthMotorDriver.setVelocityCommand(0.0);
+    azimuthMotorDriver.stop();
+    if(firstPrint){
+      SerialUSB.println("HOMED");
+      firstPrint = false;
+    }
+  }
   
   if(millis() - lastPrintTime > 100){
     
-    // azimuthSensor->debugPrint(&SerialUSB);
+    azimuthSensor->debugPrint(&SerialUSB);
     // elevationSensor->debugPrint(&SerialUSB);
     lastPrintTime = millis();
   }
