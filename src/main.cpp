@@ -57,7 +57,12 @@ IMU imu;
 // tuning interface
 TunerInterface tuner(&SerialUSB);
 
+TeensyTimerTool::PeriodicTimer debugPrintTimer;
+TeensyTimerTool::PeriodicTimer blinkTimer;
+
 ////////////////////////////////////////////////////////////////////// Local Function Declarations //////////////////////////////////////////////////////////////////////
+
+void debugPrint();
 
 void configureHardware(); // provides pin mappings and tuning parameters to objects
 
@@ -78,12 +83,13 @@ void setup()
   azimuthSensor->begin();
   azimuthMotorDriver.begin();
 
-  elevationSensor->begin();
-  elevationMotorDriver.begin();
+  debugPrintTimer.begin(debugPrint, 100000); // 100000 in µs = 100ms = 0.1s
+
+  blinkTimer.begin([]{digitalToggle(LED_POLARIS);}, 1000000); // 1000000 in us = 1s
 
   // start actual things
-  // azimuthController.begin();  
-  // elevationController.begin();
+  azimuthController.begin();  
+  elevationController.begin();
 
   // start LEDS
   pinMode(LED_BUILTIN, OUTPUT);
@@ -92,6 +98,13 @@ void setup()
   digitalWrite(LED_POLARIS, LOW);
 
   // imu.begin();
+
+  // actual begin code
+  delay(10);
+  // azimuthMotorDriver.setVelocityCommand(-1);
+  // elevationMotorDriver.setVelocityCommand(2);
+  azimuthController.homeController();
+  // elevationController.homeController();
 }
 
 ////////////////////////////////////////////////////////////////////// loop() //////////////////////////////////////////////////////////////////////
@@ -101,66 +114,31 @@ AxisController tuningController = azimuthController;
 Sensor* tuningSensor = azimuthSensor;
 // AxisController tuningController = elevationController;
 // Sensor* tuningSensor = elevationSensor;
-bool ledState;
-unsigned long lastLEDtime = 0;
-unsigned long lastPrintTime = 0;
-bool firstRun = true;
-bool firstPrint = true;
+
 void loop() 
 {
-  // update our tuner application
-  // runTuner();
-
-  // test IMU code
-  if(millis() - lastLEDtime > 1000){
-    ledState = !ledState;  
-    digitalWrite(LED_POLARIS, ledState);
-    lastLEDtime = millis();
-  }
-  // SerialUSB.println("running!");
-  
-  // imu.update();
-  // imu.debugPrint(&SerialUSB);
-
- 
-  // temp update sensors (actually updated inside AxisController)
-  azimuthSensor->update();
-  elevationSensor->update();
-
-  // digitalWrite(LED_BUILTIN, azimuthSensor->isZeroed());
-  
-  if(firstRun){
-    firstRun = false;
-    
-    // azimuthController.setHoldBehavior(HoldBehavior::brakeMode);
-    digitalWrite(azimuthEnable, LOW);
-    digitalWrite(elevationEnable, HIGH);
-    delay(10);
-    azimuthMotorDriver.setVelocityCommand(-1);
-    elevationMotorDriver.setVelocityCommand(-2);
-  }
 
 
-  if(azimuthSensor->update() == 1){
-    azimuthMotorDriver.setVelocityCommand(0.0);
-    azimuthMotorDriver.stop();
-    if(firstPrint){
-      SerialUSB.println("HOMED");
-      firstPrint = false;
-    }
-  }
-  
-  if(millis() - lastPrintTime > 100){
-    
-    azimuthSensor->debugPrint(&SerialUSB);
-    // elevationSensor->debugPrint(&SerialUSB);
-    lastPrintTime = millis();
-  }
-
+  // if(azimuthSensor->update() == 1){
+  //   azimuthMotorDriver.setVelocityCommand(0.0);
+  //   azimuthMotorDriver.stop();
+  //   if(firstPrint){
+  //     SerialUSB.println("HOMED");
+  //     firstPrint = false;
+  //   }
+  // }
 }
 
 
 ////////////////////////////////////////////////////////////////////// Local Function Definitions //////////////////////////////////////////////////////////////////////
+
+void debugPrint()
+{
+  
+  // azimuthSensor->debugPrint(&SerialUSB);
+  // elevationSensor->debugPrint(&SerialUSB);
+}
+
 
 void configureHardware()
 {

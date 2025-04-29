@@ -11,6 +11,8 @@
 
 enum HoldBehavior {coastMode, brakeMode};
 
+enum State {disabled, stopped, running, homing, stopping};
+
 class AxisController
 {
     public:
@@ -38,21 +40,65 @@ class AxisController
         void updateLoop()
         {
             sensor->update(); // run an update loop for our sensor so we chilling on position
-            motionProfiler.update(timeStep); // update our motion profiler so we can get the new desired pos/vel data
-
-            float error = motionProfiler.getDesiredPosition() - sensor->getDistFrom0();
-            float targetVel = motionProfiler.getDesiredVelocity();
+            
 
             // generate our commanded velocity
-            float velocityCommand = (kP * error) + (kD * targetVel) + getGravityFF();
+            float velocityCommand;
+
+            // generate commanded velocity depending on operating state
+            switch(state)
+            {
+                case State::disabled:
+                    velocityCommand = 0;
+                    break;
+
+                case State::stopped:
+                    velocityCommand = 0;
+                    break;
+
+                case State::homing:
+                    velocityCommand = -0.5;
+                    if(sensor->isZeroed()){ state = State::stopped; } // internal state transition to stopped when we have homed
+                    break; 
+
+                case State::stopping:
+                    
+                    // TO:DO - change lines to relate to velocity
+
+                    if (reachedGoal){ state = State::disabled; };
+                    // if(currentVelocity() == 0){ state = State::disabled; }; // internal state transition when we have reached our destination
+                    // we don't care about positional accuracy, just stopping ASAP
+
+                    // we intentionally don't break here so we run the following code to continue to run the motion profiler
+
+                case State::running:
+                    motionProfiler.update(timeStep); // update our motion profiler so we can get the new desired pos/vel data
+                    float error = motionProfiler.getDesiredPosition() - sensor->getDistFrom0();
+                    velocityCommand = (kP * error) + (kD * motionProfiler.getDesiredVelocity()) + getGravityFF();
+
+                    // TO:DO - have a velocity requirement for us to have reached the goal, not just position
+
+                    reachedGoal = ( fabs(error) < acceptableError); 
+                    if(reachedGoal){ state = State::stopped; }; 
+                    break;
+            }
 
             // constrain it to be within our maximum allowable velocity
             velocityCommand = constrain(velocityCommand, -maxVelocityLimit, maxVelocityLimit);
-            if(enabled){
+            if(state != State::disabled) // this check is technically unnecessary, but is another safety check
+            {
+                // make sure that the controller can actually output
+                applyHoldBehavior(HoldBehavior::brakeMode);
                 driver->setVelocityCommand(velocityCommand);
+                SerialUSB.println("setting velocity: " + String(velocityCommand));
             }
 
-            reachedGoal = ( fabs(error) < acceptableError);
+            // we only want to apply our hold behavior when we are disabled
+            if(state == State::disabled)
+            {
+                driver->setVelocityCommand(0.0); // safety measure
+                applyHoldBehavior(getHoldBehavior()); // make sure we update our hold behavior/enable so we chillin on that
+            }
         };
 
         uint8_t begin()
@@ -63,9 +109,8 @@ class AxisController
             setHoldBehavior(HoldBehavior::coastMode); // begin in a disabled state for on-boot calibration
             applyHoldBehavior(getHoldBehavior());            
             
-            controlLoopTimer.begin([this]() { this->updateLoop(); }, timeStep, false); // in µs
+            controlLoopTimer.begin([this]() { this->updateLoop(); }, timeStep); // in µs
 
-            
             return 0;
         };
 
@@ -78,26 +123,22 @@ class AxisController
         // it will act similar to the brakeMode hold behavior, but will actively maintain position.
         void startController()
         {
-            enabled = true; // set this safety value on as the very first thing
-            // we need to make sure that the controller is enabled ("brake mode") before sending steps
-            applyHoldBehavior(HoldBehavior::brakeMode);
-            controlLoopTimer.start();
+            state = State::stopped; // change to an an enabled mode
         };
+
+        void homeController()
+        {
+            state = State::homing;
+        }
 
         // this will stop the controller as soon as is feasible, while following the physical limits and deaccelerating smoothly
         // it will then apply the desired hold behavior
-        // to work correctly, this function should be called repeatidly until it returns true
         bool smoothStopController()
         {
             // update to have our goal be to stop in the current position (there will be some overshoot with this method but that's fine)
             setTarget(sensor->getDistFrom0());
-            
-            if(atPosition()){
-                driver->setVelocityCommand(0.0, true); // ensure that we stop sending step pulses before doing anything
-                applyHoldBehavior(desiredHoldBehavior);
-                enabled = false; // set this safety value off as the very last thing
-                return true;
-            }
+
+            state = State::stopping;            
             return false;
         };
 
@@ -111,12 +152,12 @@ class AxisController
             applyHoldBehavior(HoldBehavior::brakeMode); // we set this twice just to be extra safe that it won't drop
             driver->setVelocityCommand(0.0, true); // stop the motor
             applyHoldBehavior(HoldBehavior::brakeMode);
-            enabled = false; // set this safety value off as the very last thing
+            state = State::disabled; // set this safety value off as the very last thing
         };
 
-        bool controllerEnabled() { return enabled; };
+        bool controllerEnabled() { return (state != State::disabled); };
 
-        bool atPosition() { return reachedGoal; };
+        bool isAtPosition() { return reachedGoal; };
 
         void setTarget(float target)
         {
@@ -134,6 +175,8 @@ class AxisController
 
         // sCurveProfiler motionProfiler = sCurveProfiler();
 
+        State state;
+
         TeensyTimerTool::PeriodicTimer controlLoopTimer;
 
         bool reachedGoal = false;
@@ -141,8 +184,6 @@ class AxisController
         float timeStep; // microseconds (us)
 
         HoldBehavior desiredHoldBehavior = HoldBehavior::brakeMode;
-
-        bool enabled;
 
         // tuning parameters
         float kP;
@@ -165,12 +206,12 @@ class AxisController
             if(holdBehavior == brakeMode){
                 // this enables the driver, which means it runs current through the windings even if it isn't getting steps
                 // this acts very similar to "brake mode" on brushed or brushless motor drivers, hence the naming
-                digitalWrite(enablePin, HIGH); 
+                digitalWrite(enablePin, LOW); 
             }
             else if(holdBehavior == coastMode){
                 // this disables the driver, which means it just leaves the windings "disconnected", not shorted or anything
                 // this acts very similar to "coast mode" on brushed or brushless motor drivers, hence the naming
-                digitalWrite(enablePin, LOW); 
+                digitalWrite(enablePin, HIGH); 
             }
         }
 };

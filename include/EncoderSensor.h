@@ -26,19 +26,18 @@ class EncoderSensor : public Sensor
         {
             currentPos = encoder.read() - zeroPos;
 
-
-            bool state = digitalRead(pinLimit);
-            if(state != lastState){ // if we aren't in the same thing, then reset
+            bool switchState = digitalRead(pinLimit);
+            if(switchState != lastSwitchState){ // if we aren't in the same thing, then reset
                 lastDebounceTime = millis();
             }
 
             if((millis() - lastDebounceTime) > debounceTime)
             {
-                if(state != storedState) // we've actually changed state
+                if(switchState != storedSwitchState) // we've actually changed state
                 {
-                    storedState = state;
+                    storedSwitchState = switchState;
 
-                    if(storedState == LOW)
+                    if(storedSwitchState == LOW)
                     {
                         SerialUSB.println("ZEROING");
                         Sensor::setZero(encoder.read());
@@ -46,7 +45,7 @@ class EncoderSensor : public Sensor
                     }
                 }
             }
-            lastState = state;
+            lastSwitchState = switchState;
 
             return 0;
         }
@@ -57,7 +56,7 @@ class EncoderSensor : public Sensor
             printInterface->print("Zero Position: "); printInterface->print(zeroPos); printInterface->print(", ");
             printInterface->print("Encoder Ticks: "); printInterface->print(encoder.read()); printInterface->print(", ");
             printInterface->print("Limit Switch State: "); printInterface->print(digitalRead(pinLimit)); printInterface->print(", ");
-            printInterface->print("Debounced State: "); printInterface->print(storedState); printInterface->println("");
+            printInterface->print("Debounced State: "); printInterface->print(storedSwitchState); printInterface->println("");
         }
 
 
@@ -66,11 +65,11 @@ class EncoderSensor : public Sensor
         uint8_t pinB;
 
         uint8_t pinLimit;
-        
+
         uint64_t debounceTime = 10; // ms
         uint64_t lastDebounceTime;
-        bool lastState;
-        bool storedState;
+        bool lastSwitchState;
+        bool storedSwitchState;
 
         Encoder encoder = Encoder();
 

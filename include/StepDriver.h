@@ -42,7 +42,6 @@ class StepDriver
             double stepFreq = abs(setVelocity) / (degPerStep / microstepRes);
             bool dir = setVelocity >= 0;
             setDirection(dir);
-            SerialUSB.println(stepFreq, 7);
             updateFrequency(stepFreq);
 
             if(startAutomatically){ start(); };
@@ -77,7 +76,7 @@ class StepDriver
             }
             // Convert frequency to period in microseconds
             float periodMicros = 1e6 / frequency / 2; // half period (toggle HIGH/LOW)
-            SerialUSB.println(periodMicros);
+
             /*
             digitalWriteFast can change a pin's state far faster, 
             at the expense of not doing some safety checking/perfect cross-platform compatibility.
@@ -86,7 +85,6 @@ class StepDriver
             */
 
             if(doubleDriver){ // two drivers
-                SerialUSB.println("start");
                 timer.begin([this]() {
                     digitalWrite(stepPin, stepPinState); 
                     digitalWrite(stepPin2, stepPinState); 
