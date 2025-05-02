@@ -7,9 +7,11 @@ const float azimuthMaxAcceleration  = 0.0; // degrees per second^2
 const float azimuthMaxJerk          = 0.0; // degrees per second^3
 
 const float azimuthAcceptableError = 0.0; // degrees
+const float azimuthAcceptableVelocityError = 0.0; // degrees per second
 
-const float azimuthkP   = 0.0;
-const float azimuthkD   = 0.0;
+const float azimuthFF   = 0.0; // technically units of velocity
+const float azimuthkP   = 0.0; // unitless
+const float azimuthkD   = 0.0; // unitless
 
 
 const float elevationMaxVelocity      = 0.0; // degrees per second
@@ -17,13 +19,14 @@ const float elevationMaxAcceleration  = 0.0; // degrees per second^2
 const float elevationMaxJerk          = 0.0; // degrees per second^3
 
 const float elevationAcceptableError = 0.0; // degrees
+const float elevationAcceptableVelocityError = 0.0; // degrees per second
 
-const float elevationkP   = 0.0;
-const float elevationkD   = 0.0;
-const float elevationGravityCompFactor = 0.0;
+const float elevationFF   = 0.0; // technically units of velocity
+const float elevationkP   = 0.0; // unitless
+const float elevationkD   = 0.0; // unitless
+const float elevationGravityCompFactor = 0.0; // technically not unitless, but determined emperically, not by calculation
 
-
-const float timeStep = 10000; // 10000us = 10ms = 100Hz loop update rate
+const float controlLoopTimeStep = 10000; // us - 10000us = 10ms = 100Hz control loop update rate
 
 ////////////////////////////////////////////////////////////////////// Physical Constants //////////////////////////////////////////////////////////////////////
 

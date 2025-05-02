@@ -85,7 +85,7 @@ void setup()
 
   debugPrintTimer.begin(debugPrint, 100000); // 100000 in µs = 100ms = 0.1s
 
-  blinkTimer.begin([]{digitalToggle(LED_POLARIS);}, 1000000); // 1000000 in us = 1s
+  blinkTimer.begin([]{digitalToggle(LED_POLARIS);}, 1000000); // 1000000 in us = 1s blink
 
   // start actual things
   azimuthController.begin();  
@@ -104,7 +104,7 @@ void setup()
   // azimuthMotorDriver.setVelocityCommand(-1);
   // elevationMotorDriver.setVelocityCommand(2);
   azimuthController.homeController();
-  // elevationController.homeController();
+  elevationController.homeController();
 }
 
 ////////////////////////////////////////////////////////////////////// loop() //////////////////////////////////////////////////////////////////////
@@ -115,18 +115,9 @@ Sensor* tuningSensor = azimuthSensor;
 // AxisController tuningController = elevationController;
 // Sensor* tuningSensor = elevationSensor;
 
+// as everything is run through timers, loop goes unused
 void loop() 
 {
-
-
-  // if(azimuthSensor->update() == 1){
-  //   azimuthMotorDriver.setVelocityCommand(0.0);
-  //   azimuthMotorDriver.stop();
-  //   if(firstPrint){
-  //     SerialUSB.println("HOMED");
-  //     firstPrint = false;
-  //   }
-  // }
 }
 
 
@@ -134,7 +125,7 @@ void loop()
 
 void debugPrint()
 {
-  
+  azimuthController.debugPrint(&SerialUSB);
   // azimuthSensor->debugPrint(&SerialUSB);
   // elevationSensor->debugPrint(&SerialUSB);
 }
@@ -150,8 +141,8 @@ void configureHardware()
 
   // configure azimuth motion controller
   azimuthController.setPhysicalLimits(azimuthMaxVelocity, azimuthMaxAcceleration, azimuthMaxJerk);
-  azimuthController.setTuningParameters(azimuthkP, azimuthkD, 0.0, azimuthAcceptableError);
-  azimuthController.setLoopTimeStep(timeStep);
+  azimuthController.setTuningParameters(azimuthFF, azimuthkP, azimuthkD, 0.0, azimuthAcceptableError, azimuthAcceptableVelocityError);
+  azimuthController.setLoopTimeStep(controlLoopTimeStep);
 
   // configure elevation hardware
   elevationSensor->setSensorPins(elevationPotentiometer);
@@ -162,8 +153,8 @@ void configureHardware()
 
   // configure elevation motion controller
   elevationController.setPhysicalLimits(elevationMaxVelocity, elevationMaxAcceleration, elevationMaxJerk);
-  elevationController.setTuningParameters(elevationkP, elevationkD, elevationGravityCompFactor, elevationAcceptableError);
-  elevationController.setLoopTimeStep(timeStep);
+  elevationController.setTuningParameters(elevationFF, elevationkP, elevationkD, elevationGravityCompFactor, elevationAcceptableError, elevationAcceptableVelocityError);
+  elevationController.setLoopTimeStep(controlLoopTimeStep);
 
 }
 
@@ -177,7 +168,7 @@ void runTuner()
   if(tuner.newData()){
     while(!tuningController.smoothStopController()){};
     tuningController.setPhysicalLimits(tuner.getMaxVel(), tuner.getMaxAccel(), tuner.getMaxJerk());
-    tuningController.setTuningParameters(tuner.getKP(), tuner.getKD(), tuner.getGravFF(), tuner.getAcceptableError());
+    // tuningController.setTuningParameters(tuner.getKP(), tuner.getKD(), tuner.getGravFF(), tuner.getAcceptableError(), tuner.getAcceptableVelocityError());
     tuningController.setHoldBehavior(tuner.getBrake() ? HoldBehavior::brakeMode : HoldBehavior::coastMode);
     // now that we've applied our new stuff, we can re-enable the controller
     tuningController.startController();
@@ -187,7 +178,7 @@ void runTuner()
 
 
   // send data to tuner
-  calculateVelAccel(tuningSensor->getDistFrom0());
+  // calculateVelAccel(tuningSensor->getDistFrom0());
   sendTunerData(tuningController.motionProfiler.getDesiredPosition(), tuningSensor->getDistFrom0(),
                 tuningController.motionProfiler.getDesiredVelocity(), actualVel,
                 tuningController.motionProfiler.getDesiredAcceleration(), actualAcc);
