@@ -15,8 +15,9 @@ class EncoderSensor : public Sensor
 
         uint8_t begin() override
         {
-            encoder = Encoder(pinA, pinB);
+            encoder.begin(pinA, pinB);
             pinMode(pinLimit, INPUT_PULLUP);
+            zeroed = false;
             return 0;
         };
 
@@ -24,13 +25,39 @@ class EncoderSensor : public Sensor
         uint8_t update() override
         {
             currentPos = encoder.read() - zeroPos;
-            if(digitalRead(pinLimit) == LOW){
-                zeroPos = currentPos;
-                return 1; 
+
+            bool switchState = digitalRead(pinLimit);
+            if(switchState != lastSwitchState){ // if we aren't in the same thing, then reset
+                lastDebounceTime = millis();
             }
+
+            if((millis() - lastDebounceTime) > debounceTime)
+            {
+                if(switchState != storedSwitchState) // we've actually changed state
+                {
+                    storedSwitchState = switchState;
+
+                    if(storedSwitchState == LOW)
+                    {
+                        Sensor::setZero(encoder.read());
+                        return 1;
+                    }
+                }
+            }
+            lastSwitchState = switchState;
 
             return 0;
         }
+
+        void debugPrint(Stream *printInterface)
+        {
+            printInterface->print("Current Position: "); printInterface->print(currentPos); printInterface->print(", ");
+            printInterface->print("Zero Position: "); printInterface->print(zeroPos); printInterface->print(", ");
+            printInterface->print("Encoder Ticks: "); printInterface->print(encoder.read()); printInterface->print(", ");
+            printInterface->print("Limit Switch State: "); printInterface->print(digitalRead(pinLimit)); printInterface->print(", ");
+            printInterface->print("Debounced State: "); printInterface->print(storedSwitchState); printInterface->println("");
+        }
+
 
     private:
         uint8_t pinA;
@@ -38,6 +65,11 @@ class EncoderSensor : public Sensor
 
         uint8_t pinLimit;
 
-        Encoder encoder = Encoder(-1,-1);
+        uint64_t debounceTime = 10; // ms
+        uint64_t lastDebounceTime;
+        bool lastSwitchState;
+        bool storedSwitchState;
+
+        Encoder encoder = Encoder();
 
 };

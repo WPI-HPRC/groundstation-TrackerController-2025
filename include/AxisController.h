@@ -11,6 +11,8 @@
 
 enum HoldBehavior {coastMode, brakeMode};
 
+enum State {disabled, stopped, running, homing, stopping};
+
 class AxisController
 {
     public:
@@ -22,8 +24,8 @@ class AxisController
             { motionProfiler.setLimits(MaxVelocityLimit, maxAccelerationLimit, maxJerkLimit); maxVelocityLimit = MaxVelocityLimit; };
 
         // kP, kD, and gravity feedforward compensation are all unitless. acceptable error is in degrees.
-        void setTuningParameters(float _kP, float _kD, float gravityFeedFowardCompensation, float AcceptableError)
-            { kP = _kP; kD = _kD; gravFFComp = gravityFeedFowardCompensation; acceptableError = AcceptableError; };
+        void setTuningParameters(float _FF, float _kP, float _kD, float gravityFeedFowardCompensation, float AcceptableError, float AcceptableVelocityError)
+            { FF = _FF; kP = _kP; kD = _kD; gravFFComp = gravityFeedFowardCompensation; acceptableError = AcceptableError; acceptableVelocityError = AcceptableVelocityError; };
 
         // set how often we want the loop to run. 
         // actually updating the control loop will be handled internally with a timer, to ensure accurate control loop timing.
@@ -37,21 +39,63 @@ class AxisController
 
         void updateLoop()
         {
-            motionProfiler.update(timeStep); // update our motion profiler so we can get the new desired pos/vel data
+            sensor->update(); // run an update loop for our sensor so we chilling on position
 
-            float error = motionProfiler.getDesiredPosition() - sensor->getDistFrom0();
-            float targetVel = motionProfiler.getDesiredVelocity();
+            // generate commanded velocity depending on operating state
+            switch(state)
+            {
+                case State::disabled:
+                    velocityCommand = 0;
+                    break;
 
-            // generate our commanded velocity
-            float velocityCommand = (kP * error) + (kD * targetVel) + getGravityFF();
+                case State::stopped:
+                    velocityCommand = 0;
+                    break;
+
+                case State::homing:
+                    velocityCommand = -0.5;
+                    if(sensor->isZeroed()){ state = State::stopped; } // internal state transition to stopped when we have homed
+                    break;
+
+                case State::stopping:
+                    // TO:DO - change lines to relate to velocity
+
+                    if (reachedGoal){ state = State::disabled; };
+                    // if(fabs(sensor->getVelocity()) < acceptableVelocityError){ state = State::disabled; }; // internal state transition when we have reached our destination
+                    // we don't care about positional accuracy, just stopping ASAP
+                    
+                    [[fallthrough]]; // we intentionally fall through here to continue to run the motion profiler while stopping
+
+                case State::running:
+                    motionProfiler.update(timeStep); // update our motion profiler so we can get the new desired pos/vel data
+                    error = motionProfiler.getDesiredPosition() - sensor->getDistFrom0();
+                    
+                    // TO:DO - have gravity feedforward act only on upward motion
+                    
+                    velocityCommand = FF + (kP * error) + (kD * motionProfiler.getDesiredVelocity()) + getGravityFF();
+                    
+                    // TO:DO - have a velocity requirement for us to have reached the goal, not just position
+
+                    reachedGoal = ( fabs(error) < acceptableError); // && (fabs(sensor->getVelocity()) < acceptableVelocityError);
+                    if(reachedGoal){ state = State::stopped; }; 
+                    break;
+            }
 
             // constrain it to be within our maximum allowable velocity
             velocityCommand = constrain(velocityCommand, -maxVelocityLimit, maxVelocityLimit);
-            if(enabled){
+            if(state != State::disabled) // this check is technically unnecessary, but is another safety check
+            {
+                // make sure that the controller can actually output
+                applyHoldBehavior(HoldBehavior::brakeMode);
                 driver->setVelocityCommand(velocityCommand);
             }
 
-            reachedGoal = ( fabs(error) < acceptableError);
+            // we only want to apply our hold behavior when we are disabled
+            if(state == State::disabled)
+            {
+                driver->setVelocityCommand(0.0); // safety measure
+                applyHoldBehavior(getHoldBehavior()); // make sure we update our hold behavior/enable so we chillin on that
+            }
         };
 
         uint8_t begin()
@@ -62,9 +106,8 @@ class AxisController
             setHoldBehavior(HoldBehavior::coastMode); // begin in a disabled state for on-boot calibration
             applyHoldBehavior(getHoldBehavior());            
             
-            controlLoopTimer.begin([this]() { this->updateLoop(); }, timeStep, false); // in µs
+            controlLoopTimer.begin([this]() { this->updateLoop(); }, timeStep); // in µs
 
-            
             return 0;
         };
 
@@ -77,26 +120,22 @@ class AxisController
         // it will act similar to the brakeMode hold behavior, but will actively maintain position.
         void startController()
         {
-            enabled = true; // set this safety value on as the very first thing
-            // we need to make sure that the controller is enabled ("brake mode") before sending steps
-            applyHoldBehavior(HoldBehavior::brakeMode);
-            controlLoopTimer.start();
+            state = State::stopped; // change to an an enabled mode
         };
+
+        void homeController()
+        {
+            state = State::homing;
+        }
 
         // this will stop the controller as soon as is feasible, while following the physical limits and deaccelerating smoothly
         // it will then apply the desired hold behavior
-        // to work correctly, this function should be called repeatidly until it returns true
         bool smoothStopController()
         {
             // update to have our goal be to stop in the current position (there will be some overshoot with this method but that's fine)
             setTarget(sensor->getDistFrom0());
-            
-            if(atPosition()){
-                driver->setVelocityCommand(0.0, true); // ensure that we stop sending step pulses before doing anything
-                applyHoldBehavior(desiredHoldBehavior);
-                enabled = false; // set this safety value off as the very last thing
-                return true;
-            }
+
+            state = State::stopping;            
             return false;
         };
 
@@ -110,18 +149,28 @@ class AxisController
             applyHoldBehavior(HoldBehavior::brakeMode); // we set this twice just to be extra safe that it won't drop
             driver->setVelocityCommand(0.0, true); // stop the motor
             applyHoldBehavior(HoldBehavior::brakeMode);
-            enabled = false; // set this safety value off as the very last thing
+            state = State::disabled; // set this safety value off as the very last thing
         };
 
-        bool controllerEnabled() { return enabled; };
+        bool controllerEnabled() { return (state != State::disabled); };
 
-        bool atPosition() { return reachedGoal; };
+        bool isAtPosition() { return reachedGoal; };
 
         void setTarget(float target)
         {
             goalPosition = target;
             motionProfiler.setTarget(goalPosition);
-        }
+        };
+
+        void debugPrint(Stream *printInterface)
+        {
+            printInterface->print("State: "); printInterface->print(getCurrentState()); printInterface->print(", ");
+            printInterface->print("Commanded Velocity: "); printInterface->print(velocityCommand, 3); printInterface->print(", ");
+            printInterface->print("Goal Position: "); printInterface->print(goalPosition, 3); printInterface->print(", ");
+            printInterface->print("Current Position: "); printInterface->print(sensor->getDistFrom0(), 3); printInterface->print(", ");
+            printInterface->print("Error: "); printInterface->print(error, 3); printInterface->print(", ");
+            printInterface->println("");
+        };
 
         // temporarily public for tuning
         sCurveProfiler motionProfiler = sCurveProfiler();
@@ -133,6 +182,8 @@ class AxisController
 
         // sCurveProfiler motionProfiler = sCurveProfiler();
 
+        State state;
+
         TeensyTimerTool::PeriodicTimer controlLoopTimer;
 
         bool reachedGoal = false;
@@ -141,9 +192,8 @@ class AxisController
 
         HoldBehavior desiredHoldBehavior = HoldBehavior::brakeMode;
 
-        bool enabled;
-
         // tuning parameters
+        float FF;
         float kP;
         float kI; // not used / implemented, just in here for possible future use
         float kD;
@@ -152,8 +202,13 @@ class AxisController
         float maxVelocityLimit;
 
         float acceptableError;
+        float acceptableVelocityError;
 
         float goalPosition;
+        
+        // these are placed here to gain observability into the system
+        float error;
+        float velocityCommand;
 
         // gravity feedfoward
         float getGravityFF()
@@ -164,12 +219,30 @@ class AxisController
             if(holdBehavior == brakeMode){
                 // this enables the driver, which means it runs current through the windings even if it isn't getting steps
                 // this acts very similar to "brake mode" on brushed or brushless motor drivers, hence the naming
-                digitalWrite(enablePin, HIGH); 
+                digitalWrite(enablePin, LOW); 
             }
             else if(holdBehavior == coastMode){
                 // this disables the driver, which means it just leaves the windings "disconnected", not shorted or anything
                 // this acts very similar to "coast mode" on brushed or brushless motor drivers, hence the naming
-                digitalWrite(enablePin, LOW); 
+                digitalWrite(enablePin, HIGH); 
             }
+        }
+
+        String getCurrentState()
+        {
+            switch(state)
+            {
+                case State::disabled:
+                    return "Disabled";
+                case State::homing:
+                    return "Homing";
+                case State::running:
+                    return "Running";
+                case State::stopped:
+                    return "Stopped";
+                case State::stopping:
+                    return "Stopping";
+            }
+            return "";
         }
 };

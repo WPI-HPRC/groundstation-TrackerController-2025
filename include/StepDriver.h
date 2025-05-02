@@ -13,7 +13,7 @@ class StepDriver
         void setPins(uint8_t DirectionPin, uint8_t StepPin, uint8_t DirectionPin2, uint8_t StepPin2) // double driver
             { doubleDriver = true; dirPin = DirectionPin; stepPin = StepPin; dirPin2 = DirectionPin2; stepPin2 = StepPin2; };
 
-        void setPhysicalConstants(float degreesPerStep, uint64_t microstepResolution)
+        void setPhysicalConstants(float degreesPerStep, float microstepResolution)
             { degPerStep = degreesPerStep; microstepRes = microstepResolution; };
 
         void begin()
@@ -42,7 +42,6 @@ class StepDriver
             double stepFreq = abs(setVelocity) / (degPerStep / microstepRes);
             bool dir = setVelocity >= 0;
             setDirection(dir);
-
             updateFrequency(stepFreq);
 
             if(startAutomatically){ start(); };
@@ -65,7 +64,7 @@ class StepDriver
         uint8_t stepPin2 = -1;
 
         float degPerStep;
-        uint64_t microstepRes;
+        float microstepRes;
 
         volatile bool stepPinState = false;
 
@@ -87,14 +86,14 @@ class StepDriver
 
             if(doubleDriver){ // two drivers
                 timer.begin([this]() {
-                    digitalWriteFast(stepPin, stepPinState); 
-                    digitalWriteFast(stepPin2, stepPinState);
+                    digitalWrite(stepPin, stepPinState); 
+                    digitalWrite(stepPin2, stepPinState); 
                     stepPinState = !stepPinState;
                 }, periodMicros, false);
             }
             else{ // one driver
                 timer.begin([this]() {
-                    digitalWriteFast(stepPin, stepPinState);
+                    digitalWrite(stepPin, stepPinState);
                     stepPinState = !stepPinState;
                 }, periodMicros, false);
             }
