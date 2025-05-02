@@ -39,7 +39,6 @@ class EncoderSensor : public Sensor
 
                     if(storedSwitchState == LOW)
                     {
-                        SerialUSB.println("ZEROING");
                         Sensor::setZero(encoder.read());
                         return 1;
                     }

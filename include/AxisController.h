@@ -58,7 +58,6 @@ class AxisController
                     break;
 
                 case State::stopping:
-                    
                     // TO:DO - change lines to relate to velocity
 
                     if (reachedGoal){ state = State::disabled; };
@@ -89,7 +88,6 @@ class AxisController
                 // make sure that the controller can actually output
                 applyHoldBehavior(HoldBehavior::brakeMode);
                 driver->setVelocityCommand(velocityCommand);
-                SerialUSB.println("setting velocity: " + String(velocityCommand));
             }
 
             // we only want to apply our hold behavior when we are disabled
@@ -245,5 +243,6 @@ class AxisController
                 case State::stopping:
                     return "Stopping";
             }
+            return "";
         }
 };
