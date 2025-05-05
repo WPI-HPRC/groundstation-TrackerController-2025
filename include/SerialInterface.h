@@ -22,7 +22,7 @@ public:
         // Read bytes until there aren't any more to be read
         do 
         {
-            size_t bytesRead = Serial.readBytesUntil('E', &readBuffer[readBufferIndex], READ_BUFFER_LENGTH);
+            size_t bytesRead = Serial.readBytesUntil('E', &readBuffer[readBufferIndex], READ_BUFFER_LENGTH - readBufferIndex);
 
             if(readBuffer[readBufferIndex+bytesRead == 'E'])
             {
