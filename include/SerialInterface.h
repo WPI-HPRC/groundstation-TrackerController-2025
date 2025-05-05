@@ -1,39 +1,18 @@
 #pragma once
 #include <Arduino.h>
+#include "Sensor.h"
+#include "IMU.h"
 
 #define READ_BUFFER_LENGTH 32 // Arbitrary length, but is longer than any currently-defined messages
 
 class SerialInterface
 {
-    // Takes UTF-8 encoded digits and converts them into an integer. Assumes the most significant digit comes first
-    static int utf8DigitsToInt(const char *encodedDigits, size_t length_bytes)
+public:
+    SerialInterface(Sensor *azimuthSensor, Sensor *elevationSensor, IMU *imu): azimuthSensor(azimuthSensor), elevationSensor(elevationSensor), imu(imu) {}
+
+    void send(const char *buffer, size_t length_bytes)
     {
-        int intValue = 0;
-
-        for(int i = 0; i < length_bytes; i++)
-        {
-            char currentChar = encodedDigits[i];
-
-            if('0' <= currentChar && currentChar <= '9') // Make sure the byte we're reading is a valid UTF-8-encoded integer
-            {
-                // To find the magnitude of the current digit, take the total number of digits minus 1 and subtract from it the index of the current digit 
-                // Raise 10 to that power and multiply it by the digit's integer value, which is the encoded number as an integer minus the character '0' as an integer
-                intValue += pow(10, (length_bytes - 1 - i)) * (currentChar - '0');
-            }
-            else
-            {
-                return -1;
-            }
-        }
-        return intValue;
-    }
-
-    static int bytesUntilSemicolon(const char *buffer)
-    {
-        // We assume there is actually a semicolon in the buffer
-        int i = 0;
-        while(buffer[i] != ';') { i++; }
-        return i;
+        Serial.write(buffer, length_bytes);
     }
 
     void read()
@@ -57,6 +36,47 @@ class SerialInterface
         } while (Serial.peek() != -1);
     }
 
+
+private:
+    Sensor *azimuthSensor;
+    Sensor *elevationSensor;
+    IMU *imu;
+
+    char readBuffer[READ_BUFFER_LENGTH];
+    uint readBufferIndex = 0;
+
+private:
+    // Takes UTF-8 encoded digits and converts them into an integer. Assumes the most significant digit comes first
+    static int utf8DigitsToInt(const char *encodedDigits, size_t length_bytes)
+    {
+        int intValue = 0;
+
+        for(int i = 0; i < length_bytes; i++)
+        {
+            char currentChar = encodedDigits[i];
+
+            if('0' <= currentChar && currentChar <= '9') // Make sure the byte we're reading is a valid UTF-8-encoded integer
+            {
+                // To find the magnitude of the current digit, take the total number of digits minus 1 and subtract from it the index of the current digit 
+                // Raise 10 to that power and multiply it by the digit's integer value, which is the encoded number as an integer minus the character '0' as an integer
+                intValue += pow(10, (length_bytes - 1 - i)) * (currentChar - '0');
+            }
+            else
+            {
+                return -1;
+            }
+        }
+        return intValue;
+    }
+    
+    static int bytesUntilSemicolon(const char *buffer)
+    {
+        // We assume there is actually a semicolon in the buffer
+        int i = 0;
+        while(buffer[i] != ';') { i++; }
+        return i;
+    }
+
     void handleSetter_pose(const char *buffer)
     {
         int buffer_index = bytesUntilSemicolon(buffer);
@@ -69,7 +89,6 @@ class SerialInterface
 
         float elevation_degrees = (float)utf8DigitsToInt(remainingBuffer, buffer_index) / 100;
         
-
         // Actually set the values
     }
 
@@ -84,7 +103,86 @@ class SerialInterface
                 handleSetter_pose(&buffer[2]);
                 break;
             }
+            default:
+            {
+                return;
+            }
         }
+    }
+
+    void handleGetter_pose()
+    {
+        int azimuth_degrees = round(azimuthSensor->getDistFrom0() * 100);
+        int elevation_degrees = round(elevationSensor->getDistFrom0() * 100);
+
+        String str = "D;L;";
+        str += String(azimuth_degrees) + ";";
+        str += String(elevation_degrees)  + ";";
+        str += 'E';
+
+        send(str.c_str(), str.length());
+    }
+
+    void handleGetter_gps()
+    {
+        // Get the GPS location and send it
+    }
+
+    void handleGetter_imu()
+    {
+        // Get the IMU data and send it
+    }
+
+    void handleEstop_brake()
+    {
+        // Send the command
+
+        Serial.write("D;B;E");
+    }
+
+    void handleEstop_coast()
+    {
+        // Send the command
+
+        Serial.write("D;C;E");
+    }
+
+    void handleGetter(const char *buffer)
+    {
+        char getterType = buffer[0];
+        switch(getterType)
+        {
+            case 'L':
+            {
+                handleGetter_pose();
+                break;
+            }
+            case 'G':
+            {
+                handleGetter_gps();
+                break;
+            }
+            case 'I':
+            {
+                handleGetter_imu();
+                break;
+            }
+            case 'B':
+            {
+                handleEstop_brake();
+                break;
+            }
+            case 'C':
+            {
+                handleEstop_coast();
+                break;
+            }
+            default:
+            {
+                // Should never happen
+                return;
+            }
+        };
     }
 
     void handleMessage(const char *buffer)
@@ -101,13 +199,14 @@ class SerialInterface
             }
             case 'G': // Getter
             {
-                // Handle getter
+                handleSetter(&buffer[2]);
                 break;
+            }
+            default:
+            {
+                // Should not happen
+                return;
             }
         }
     }
-
-    private:
-        char readBuffer[READ_BUFFER_LENGTH];
-        uint readBufferIndex = 0;
 };
