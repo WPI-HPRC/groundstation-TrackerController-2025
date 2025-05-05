@@ -2,13 +2,15 @@
 #include <Arduino.h>
 #include "Sensor.h"
 #include "IMU.h"
+#include "AxisController.h"
 
-#define READ_BUFFER_LENGTH 32 // Arbitrary length, but is longer than any currently-defined messages
+#define READ_BUFFER_LENGTH 64 // Arbitrary length, but is longer than any currently-defined messages
 
 class SerialInterface
 {
 public:
-    SerialInterface(Sensor *azimuthSensor, Sensor *elevationSensor, IMU *imu): azimuthSensor(azimuthSensor), elevationSensor(elevationSensor), imu(imu) {}
+    SerialInterface(Sensor *azimuthSensor, Sensor *elevationSensor, IMU *imu, AxisController *azimuthController, AxisController *elevationController): 
+        azimuthSensor(azimuthSensor), elevationSensor(elevationSensor), imu(imu), azimuthController(azimuthController), elevationController(elevationController) {}
 
     void send(const char *buffer, size_t length_bytes)
     {
@@ -25,7 +27,7 @@ public:
             if(readBuffer[readBufferIndex+bytesRead == 'E'])
             {
                 // Now we know a packet has been read completely, so handle it here
-                handleMessage();
+                handleMessage(readBuffer);
                 readBufferIndex = 0;
                 // Optionally, break here if we only want to read/handle one packet maximum per loop
             }
@@ -41,6 +43,9 @@ private:
     Sensor *azimuthSensor;
     Sensor *elevationSensor;
     IMU *imu;
+
+    AxisController *azimuthController;
+    AxisController *elevationController;
 
     char readBuffer[READ_BUFFER_LENGTH];
     uint readBufferIndex = 0;
@@ -89,7 +94,11 @@ private:
 
         float elevation_degrees = (float)utf8DigitsToInt(remainingBuffer, buffer_index) / 100;
         
-        // Actually set the values
+        azimuthController->setTarget(azimuth_degrees);
+        elevationController->setTarget(elevation_degrees);
+        
+        String response = "R;P;E";
+        send(response.c_str(), response.length());
     }
 
     void handleSetter(const char *buffer)
@@ -125,25 +134,49 @@ private:
 
     void handleGetter_gps()
     {
-        // Get the GPS location and send it
+        // TODO: Add the GPS values once GPS is implemented
+        int gpsLat_decimal = round(0 * 100);
+        int gpsLong_decimal = round(0 * 100);
+
+        String str = "D;G;";
+        str += String(gpsLat_decimal) + ";";
+        str += String(gpsLong_decimal)  + ";";
+        str += 'E';
+
+        send(str.c_str(), str.length());
     }
 
     void handleGetter_imu()
     {
-        // Get the IMU data and send it
+        IMUData imuData = imu->getData();
+        int gravityX_gs = round(imuData.xAcc * 100);
+        int gravityY_gs = round(imuData.xAcc * 100);
+        int gravityZ_gs = round(imuData.xAcc * 100);
+
+        // TODO: implement heading calculation
+        int heading_degrees = round(0 * 100);
+
+        String str = "D;I;";
+        str += String(gravityX_gs) + ";";
+        str += String(gravityY_gs)  + ";";
+        str += String(gravityZ_gs)  + ";";
+        str += String(heading_degrees)  + ";";
+        str += 'E';
+
+        send(str.c_str(), str.length());
     }
 
     void handleEstop_brake()
     {
-        // Send the command
-
+        azimuthController->eStopController();
+        elevationController->eStopController();
         Serial.write("D;B;E");
     }
 
     void handleEstop_coast()
     {
-        // Send the command
-
+        azimuthController->smoothStopController();
+        elevationController->smoothStopController();
         Serial.write("D;C;E");
     }
 
