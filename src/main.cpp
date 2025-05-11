@@ -80,9 +80,6 @@ void setup()
 
   configureHardware(); // setup pins and tuning parameters for controllers
 
-  azimuthSensor->begin();
-  azimuthMotorDriver.begin();
-
   debugPrintTimer.begin(debugPrint, 100000); // 100000 in µs = 100ms = 0.1s
 
   blinkTimer.begin([]{digitalToggle(LED_POLARIS);}, 1000000); // 1000000 in us = 1s blink
@@ -103,8 +100,8 @@ void setup()
   delay(10);
   // azimuthMotorDriver.setVelocityCommand(-1);
   // elevationMotorDriver.setVelocityCommand(2);
-  azimuthController.homeController();
-  elevationController.homeController();
+  // azimuthController.homeController();
+  // elevationController.homeController();
 }
 
 ////////////////////////////////////////////////////////////////////// loop() //////////////////////////////////////////////////////////////////////
@@ -128,7 +125,8 @@ void debugPrint()
   // azimuthController.debugPrint(&SerialUSB);
   // elevationController.debugPrint(&SerialUSB);
   // azimuthSensor->debugPrint(&SerialUSB);
-  // elevationSensor->debugPrint(&SerialUSB);
+  elevationSensor->update();
+  elevationSensor->debugPrint(&SerialUSB);
 }
 
 

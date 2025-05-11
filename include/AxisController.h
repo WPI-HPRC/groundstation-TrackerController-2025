@@ -182,7 +182,7 @@ class AxisController
 
         // sCurveProfiler motionProfiler = sCurveProfiler();
 
-        State state;
+        State state = State::disabled;
 
         TeensyTimerTool::PeriodicTimer controlLoopTimer;
 
