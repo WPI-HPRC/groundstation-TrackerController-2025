@@ -48,8 +48,8 @@ const float DegreesPerStep = 1.8f;
 ////////////////////////////////////////////////////////////////////// Sensor Calibration Values //////////////////////////////////////////////////////////////////////
 
 // must be determined emperically 
-const uint16_t elevationMinimumValue = 110; // ADC reading value
-const uint16_t elevationMaximumValue = 826; // ADC reading value
+const uint16_t elevationMinimumValue = 1; // Old value- 110; // ADC reading value
+const uint16_t elevationMaximumValue = 621; // Old value- 826; // ADC reading value
 
 // must be determined/defined
 constexpr float elevationMinimumAngle = 0.0f; // degrees
