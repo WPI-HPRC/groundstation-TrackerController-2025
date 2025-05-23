@@ -30,10 +30,10 @@
 #include "IMU.h"
 
 // this handles our interfacing to the outside world
-// #include "StreamInterface.h"
+#include "StreamInterface.h"
 
 // temporary serial interface code for tuning / bringup
-#include "TunerInterface.h"
+// #include "TunerInterface.h"
 
 ////////////////////////////////////////////////////////////////////// Global Objects //////////////////////////////////////////////////////////////////////
 
@@ -55,14 +55,20 @@ AxisController elevationController(&elevationMotorDriver, elevationEnable, eleva
 IMU imu;
 
 // tuning interface
-TunerInterface tuner(&SerialUSB);
+// TunerInterface tuner(&SerialUSB);
 
-TeensyTimerTool::PeriodicTimer debugPrintTimer;
+// serial interface
+StreamInterface serialInterface(&SerialUSB, azimuthSensor, elevationSensor, &azimuthController, &elevationController);
+
+TeensyTimerTool::PeriodicTimer interfaceTimer;
 TeensyTimerTool::PeriodicTimer blinkTimer;
 
 ////////////////////////////////////////////////////////////////////// Local Function Declarations //////////////////////////////////////////////////////////////////////
 
+void interfaceLoop();
+
 void debugPrint();
+void interface();
 
 void configureHardware(); // provides pin mappings and tuning parameters to objects
 
@@ -80,7 +86,7 @@ void setup()
 
   configureHardware(); // setup pins and tuning parameters for controllers
 
-  debugPrintTimer.begin(debugPrint, 100000); // 100000 in µs = 100ms = 0.1s
+  interfaceTimer.begin(interfaceLoop, 100000); // 100000 in µs = 100ms = 0.1s
 
   blinkTimer.begin([]{digitalToggle(LED_POLARIS);}, 1000000); // 1000000 in us = 1s blink
 
@@ -117,16 +123,24 @@ void loop()
 {
 }
 
-
 ////////////////////////////////////////////////////////////////////// Local Function Definitions //////////////////////////////////////////////////////////////////////
 
-void debugPrint()
+void interfaceLoop()
 {
+  // debugPrint();
+  interface();
+}
+
+void debugPrint(){
   // azimuthController.debugPrint(&SerialUSB);
   // elevationController.debugPrint(&SerialUSB);
   // azimuthSensor->debugPrint(&SerialUSB);
   elevationSensor->update();
   elevationSensor->debugPrint(&SerialUSB);
+}
+
+void interface(){
+  serialInterface.read();
 }
 
 
@@ -160,7 +174,7 @@ void configureHardware()
 
 float actualVel;
 float actualAcc;
-void runTuner()
+/*void runTuner()
 {
   // check for tuner updates
   tuner.readSerial();
@@ -181,7 +195,7 @@ void runTuner()
   sendTunerData(tuningController.motionProfiler.getDesiredPosition(), tuningSensor->getDistFrom0(),
                 tuningController.motionProfiler.getDesiredVelocity(), actualVel,
                 tuningController.motionProfiler.getDesiredAcceleration(), actualAcc);
-}
+}*/
 
 float prevPos;
 float prevVel;
