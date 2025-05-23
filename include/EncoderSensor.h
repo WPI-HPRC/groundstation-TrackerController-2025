@@ -15,7 +15,7 @@ class EncoderSensor : public Sensor
 
         uint8_t begin() override
         {
-            //encoder.begin(pinA, pinB);
+            encoder.begin(pinA, pinB);
             pinMode(pinLimit, INPUT_PULLUP);
             zeroed = false;
             return 0;
@@ -70,6 +70,6 @@ class EncoderSensor : public Sensor
         bool lastSwitchState;
         bool storedSwitchState;
 
-        Encoder encoder = Encoder(pinA, pinB);
+        Encoder encoder = Encoder();
 
 };
