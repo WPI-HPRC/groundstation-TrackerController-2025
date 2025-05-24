@@ -1,16 +1,18 @@
 #pragma once
 
 #include <Arduino.h>
+
 #include "Sensor.h"
 #include "AxisController.h"
+#include "IMU.h"
 
 #define READ_BUFFER_LENGTH 64 // Arbitrary length, but is longer than any currently-defined messages
 
 class StreamInterface
 {
     public:
-        StreamInterface(Stream *StreamInterface, Sensor *AzimuthSensor, Sensor *ElevationSensor, AxisController *AzimuthAxis, AxisController *ElevationAxis) 
-        : streamInterface(StreamInterface), azimuthSensor(AzimuthSensor), elevationSensor(ElevationSensor), azimuthController(AzimuthAxis), elevationController(ElevationAxis) {};
+        StreamInterface(Stream *StreamInterface, Sensor *AzimuthSensor, Sensor *ElevationSensor, AxisController *AzimuthAxis, AxisController *ElevationAxis, IMU *Imu) 
+        : streamInterface(StreamInterface), azimuthSensor(AzimuthSensor), elevationSensor(ElevationSensor), azimuthController(AzimuthAxis), elevationController(ElevationAxis), imu(Imu) {};
 
         void send(const char *buffer, size_t length_bytes) { streamInterface->write(buffer, length_bytes); };
 
@@ -46,6 +48,7 @@ private: // variables
         Sensor *elevationSensor;
         AxisController *azimuthController;
         AxisController *elevationController;
+        IMU *imu;
 
 private: // functions
 
@@ -95,7 +98,7 @@ private: // functions
 
             send(str.c_str(), str.length());
         }
-/*
+
         void handleGetter_imu()
         {
             IMUData imuData = imu->getData();
@@ -111,11 +114,11 @@ private: // functions
             str += String(gravityY_gs)  + ";";
             str += String(gravityZ_gs)  + ";";
             str += String(heading_degrees)  + ";";
-            str += 'E';``
+            str += 'E';
 
             send(str.c_str(), str.length());
         }
-*/
+
         void handleEstop_brake()
         {
             azimuthController->eStopController();
@@ -165,7 +168,7 @@ private: // functions
                 }
                 case 'I':
                 {
-                    // handleGetter_imu();
+                    handleGetter_imu();
                     break;
                 }
                 case 'B':

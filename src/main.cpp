@@ -58,7 +58,7 @@ IMU imu;
 // TunerInterface tuner(&SerialUSB);
 
 // serial interface
-StreamInterface serialInterface(&SerialUSB, azimuthSensor, elevationSensor, &azimuthController, &elevationController);
+StreamInterface serialInterface(&SerialUSB, azimuthSensor, elevationSensor, &azimuthController, &elevationController, &imu);
 
 TeensyTimerTool::PeriodicTimer interfaceTimer;
 TeensyTimerTool::PeriodicTimer blinkTimer;
@@ -100,7 +100,7 @@ void setup()
   digitalWrite(LED_BUILTIN, LOW);
   digitalWrite(LED_POLARIS, LOW);
 
-  // imu.begin();
+  imu.begin();
 
   // actual begin code
   delay(10);
