@@ -15,14 +15,33 @@ class StreamInterface
         : streamInterface(StreamInterface), azimuthSensor(AzimuthSensor), elevationSensor(ElevationSensor), azimuthController(AzimuthAxis), elevationController(ElevationAxis), imu(Imu) {};
 
         void send(const char *buffer, size_t length_bytes) { streamInterface->write(buffer, length_bytes); };
+        Stream *streamInterface;
 
         void read()
         {
             // Read bytes until there aren't any more to be read
-            do 
+            while (streamInterface->peek() != -1) 
             {
-                size_t bytesRead = streamInterface->readBytesUntil('E', &readBuffer[readBufferIndex], READ_BUFFER_LENGTH - readBufferIndex);
+                size_t bytesRead = streamInterface->readBytes(&readBuffer[readBufferIndex], READ_BUFFER_LENGTH - readBufferIndex);
 
+                Serial.printf("Read %d bytes\n\t", bytesRead);
+                String str = "";
+
+                for (size_t i = 0; i < bytesRead; i++)
+                {
+                    // str += readBuffer[readBufferIndex + i];
+                    // str.append(readBuffer[readBufferIndex + i]);
+                    Serial.printf("%c", readBuffer[readBufferIndex + i]);
+                }
+
+                // Serial.printf("%c", streamInterface->read());
+                Serial.print("\n\n");
+
+
+                if(bytesRead == 0)
+                {
+                    break;
+                }
                 if(readBuffer[readBufferIndex+bytesRead == 'E'])
                 {
                     // Now we know a packet has been read completely, so handle it here
@@ -34,12 +53,11 @@ class StreamInterface
                 {
                     readBufferIndex += bytesRead;
                 }
-            } while (streamInterface->peek() != -1);
+            }
         };
         
 
 private: // variables
-        Stream *streamInterface;
 
         char readBuffer[READ_BUFFER_LENGTH];
         uint readBufferIndex = 0;
@@ -66,9 +84,11 @@ private: // functions
             float elevation_degrees = (float)utf8DigitsToInt(remainingBuffer, buffer_index) / 100;
 
             // we only want to apply the value if the axes are zeroed.
-            if(azimuthSensor->isZeroed() && elevationSensor->isZeroed()){
+            if((azimuthSensor->isZeroed() && elevationSensor->isZeroed()) || true){
                 azimuthController->setTarget(azimuth_degrees);
                 elevationController->setTarget(elevation_degrees);
+                azimuthController->startController();
+                azimuthController->debugPrint(streamInterface);
             }
             
             String response = "R;P;E";

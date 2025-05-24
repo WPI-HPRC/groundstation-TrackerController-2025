@@ -38,6 +38,11 @@ class StepDriver
         // if you wish to set the velocity but not start outputting steps, set the second argument to false
         void setVelocityCommand(float setVelocity, bool startAutomatically = true)
         {
+            if(setVelocity == 0)
+            {
+                stop();
+                return;
+            }
             // Convert velocity command to step frequency
             double stepFreq = abs(setVelocity) / (degPerStep / microstepRes);
             bool dir = setVelocity >= 0;

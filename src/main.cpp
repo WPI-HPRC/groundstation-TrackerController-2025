@@ -81,7 +81,7 @@ void sendTunerData(float desiredPos, float actualPos, float desiredVel, float ac
 
 void setup() 
 {
-  SerialUSB.begin(115200);
+  SerialUSB.begin(9600);
   while(!SerialUSB){} // wait for connection
 
   configureHardware(); // setup pins and tuning parameters for controllers
@@ -107,7 +107,8 @@ void setup()
   // azimuthMotorDriver.setVelocityCommand(-1);
   // elevationMotorDriver.setVelocityCommand(2);
   azimuthController.homeController();
-  elevationController.homeController();
+
+  // elevationController.homeController();
 }
 
 ////////////////////////////////////////////////////////////////////// loop() //////////////////////////////////////////////////////////////////////

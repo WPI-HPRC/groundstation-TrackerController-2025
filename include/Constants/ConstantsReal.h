@@ -2,16 +2,16 @@
 
 ////////////////////////////////////////////////////////////////////// Tuning Parameters //////////////////////////////////////////////////////////////////////
 
-const float azimuthMaxVelocity      = 10.0; // degrees per second
-const float azimuthMaxAcceleration  = 10.0; // degrees per second^2
-const float azimuthMaxJerk          = 10.0; // degrees per second^3
+const float azimuthMaxVelocity      = 0.5; // degrees per second
+const float azimuthMaxAcceleration  = 0.5; // degrees per second^2
+const float azimuthMaxJerk          = 0.5; // degrees per second^3
 
-const float azimuthAcceptableError = 0.0; // degrees
-const float azimuthAcceptableVelocityError = 0.0; // degrees per second
+const float azimuthAcceptableError = 25; // degrees
+const float azimuthAcceptableVelocityError = 1; // degrees per second
 
 const float azimuthFF   = 0.5; // units of velocity
-const float azimuthkP   = 0.0; // unitless
-const float azimuthkD   = 0.0; // unitless
+const float azimuthkP   = 0.1; // unitless
+const float azimuthkD   = 0.1; // unitless
 
 
 const float elevationMaxVelocity      = 10.0; // degrees per second

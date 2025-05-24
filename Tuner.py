@@ -12,7 +12,7 @@ class TuningDashboard(QWidget):
     def __init__(self):
         super().__init__()
 
-        self.serial = serial.Serial('COM4', 115200, timeout=0.1)  # Adjust COM port as needed
+        self.serial = serial.Serial('/dev/tty.usbmodem162000201', 9600, timeout=0.1)  # Adjust COM port as needed
         time.sleep(2)
 
         self.last_pos = None

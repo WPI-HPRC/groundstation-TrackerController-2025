@@ -69,6 +69,9 @@ class AxisController
                 case State::running:
                     motionProfiler.update(timeStep); // update our motion profiler so we can get the new desired pos/vel data
                     error = motionProfiler.getDesiredPosition() - sensor->getDistFrom0();
+
+                    Serial.printf("Distance from 0 = %0.5f\n", sensor->getDistFrom0());
+                    Serial.printf("Error = %0.5f\n", error);
                     
                     // TO:DO - have gravity feedforward act only on upward motion
                     
@@ -120,7 +123,7 @@ class AxisController
         // it will act similar to the brakeMode hold behavior, but will actively maintain position.
         void startController()
         {
-            state = State::stopped; // change to an an enabled mode
+            state = State::running; // change to an an enabled mode
         };
 
         void homeController()
