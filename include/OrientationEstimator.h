@@ -36,7 +36,10 @@ class OrientationEstimator
         {
             printInterface->print("Pitch: "); printInterface->print(orientation.pitch*RAD_TO_DEG, 4); printInterface->print(", ");
             printInterface->print("Roll: "); printInterface->print(orientation.roll*RAD_TO_DEG, 4); printInterface->print(", ");
-            printInterface->print("Yaw: "); printInterface->print(orientation.yaw*RAD_TO_DEG, 4); printInterface->println();
+            printInterface->print("Yaw: "); printInterface->print(orientation.yaw*RAD_TO_DEG, 4); printInterface->print(", ");
+            printInterface->print("Mag X: "); printInterface->print(imu->getData().xMag, 4); printInterface->print(", ");
+            printInterface->print("Mag Y: "); printInterface->print(imu->getData().yMag, 4); printInterface->print(", ");
+            printInterface->print("Mag Z: "); printInterface->print(imu->getData().zMag, 4); printInterface->print("\n");
         }
 
         // pitch, roll, yaw

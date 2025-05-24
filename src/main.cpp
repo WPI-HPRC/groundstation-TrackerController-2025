@@ -92,6 +92,7 @@ void setup()
   // start actual things
   azimuthController.begin();  
   elevationController.begin();
+
   orientationEstimator.begin();
 
   // start LEDS
@@ -121,20 +122,7 @@ Sensor* tuningSensor = azimuthSensor;
 // as everything is run through timers, loop goes unused
 void loop() 
 {
-  // update our tuner application
-  // runTuner();
-
-  // test IMU code
-  orientationEstimator.update();
-
-  // imu.update();
-  digitalWrite(LED_BUILTIN, HIGH);
-
-  // orientationEstimator.debugPrint(&SerialUSB);
-  orientationEstimator.visualizationPrint(&SerialUSB);
-  // imu.debugPrint(&SerialUSB);
-
-  delay(10);
+  
   
 
 }
@@ -147,8 +135,17 @@ void debugPrint()
   // azimuthController.debugPrint(&SerialUSB);
   // elevationController.debugPrint(&SerialUSB);
   // azimuthSensor->debugPrint(&SerialUSB);
-  elevationSensor->update();
-  elevationSensor->debugPrint(&SerialUSB);
+  // elevationSensor->update();
+  // elevationSensor->debugPrint(&SerialUSB);
+
+  // test IMU code
+  orientationEstimator.update();
+
+  // orientationEstimator.debugPrint(&SerialUSB);
+  // orientationEstimator.visualizationPrint(&SerialUSB);
+  imu.debugPrint(&SerialUSB);
+
+  delay(10);
 }
 
 
