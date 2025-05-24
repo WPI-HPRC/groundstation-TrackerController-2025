@@ -7,7 +7,7 @@
 
 #include "StepDriver.h"
 
-#include "sCurveProfiler.h"
+#include "MotionProfiler.h"
 
 enum HoldBehavior {coastMode, brakeMode};
 
@@ -173,7 +173,7 @@ class AxisController
         };
 
         // temporarily public for tuning
-        sCurveProfiler motionProfiler = sCurveProfiler();
+        MotionProfiler motionProfiler = MotionProfiler();
     private:
         // physical hardware interfaces
         Sensor *sensor = nullptr;
