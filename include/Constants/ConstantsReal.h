@@ -9,7 +9,7 @@ const float azimuthMaxJerk          = 10.0; // degrees per second^3
 const float azimuthAcceptableError = 0.0; // degrees
 const float azimuthAcceptableVelocityError = 0.0; // degrees per second
 
-const float azimuthFF   = 0.0; // technically units of velocity
+const float azimuthFF   = 0.5; // units of velocity
 const float azimuthkP   = 0.0; // unitless
 const float azimuthkD   = 0.0; // unitless
 
@@ -21,7 +21,7 @@ const float elevationMaxJerk          = 10.0; // degrees per second^3
 const float elevationAcceptableError = 0.0; // degrees
 const float elevationAcceptableVelocityError = 0.0; // degrees per second
 
-const float elevationFF   = 0.0; // technically units of velocity
+const float elevationFF   = 0.5; // units of velocity
 const float elevationkP   = 0.0; // unitless
 const float elevationkD   = 0.0; // unitless
 const float elevationGravityCompFactor = 0.0; // technically not unitless, but determined emperically, not by calculation
