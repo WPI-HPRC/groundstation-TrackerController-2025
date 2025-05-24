@@ -24,15 +24,33 @@ class Sensor
         virtual float getDistFrom0()
             {return currentPos * conversionConstant; };
 
+        virtual float getVelocity()
+            {return currentVel * conversionConstant; };
+
         virtual void debugPrint(Stream* printInterface);
 
         virtual ~Sensor() {};
 
     protected:
         int64_t currentPos; // use integers internally to prevent any floating point weirdness
+        int64_t lastPos;
         int64_t zeroPos = 0;
+
+        float currentVel;
+
+        unsigned long lastTime;
 
         float conversionConstant;
 
         bool zeroed = false;
+
+        void updateVelocity(){
+            // time math
+            unsigned long dt = micros() - lastTime;
+            lastTime = micros();
+
+            // velocity math
+            currentVel = (currentPos - lastPos) / dt;
+            lastPos = currentPos;            
+        }
 };

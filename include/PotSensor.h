@@ -42,11 +42,28 @@ class PotSensor : public Sensor
         uint8_t update() override
         {
             currentPos = analogRead(analogPin);
+
+            // update velocity
+                // convert to actual degrees
+            float currentRealPos = ( (currentPos - zeroPos ) * conversionConstant );
+            float lastRealPos = ( (lastPos - zeroPos ) * conversionConstant );
+
+            // time math
+            unsigned long dt = micros() - lastTime;
+            lastTime = micros();
+
+            // velocity math
+            currentVel = (currentRealPos - lastRealPos) / dt;
+            lastPos = currentPos;
+
             return 0;
         }
 
-        float getDistFrom0()
+        float getDistFrom0() override
             { return (currentPos - zeroPos) * conversionConstant; }; // sensors should use their raw value internally, and we only convert to the desired unit with the conversion constant before we give it to the user
+
+        float getVelocity() override
+            { return currentVel; };
 
     private:
         uint8_t analogPin;
