@@ -65,9 +65,12 @@ private: // functions
 
             float elevation_degrees = (float)utf8DigitsToInt(remainingBuffer, buffer_index) / 100;
 
-            azimuthController->setTarget(azimuth_degrees);
-            elevationController->setTarget(elevation_degrees);
-
+            // we only want to apply the value if the axes are zeroed.
+            if(azimuthSensor->isZeroed() && elevationSensor->isZeroed()){
+                azimuthController->setTarget(azimuth_degrees);
+                elevationController->setTarget(elevation_degrees);
+            }
+            
             String response = "R;P;E";
             send(response.c_str(), response.length());
         };
