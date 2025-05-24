@@ -106,8 +106,8 @@ void setup()
   delay(10);
   // azimuthMotorDriver.setVelocityCommand(-1);
   // elevationMotorDriver.setVelocityCommand(2);
-  // azimuthController.homeController();
-  // elevationController.homeController();
+  azimuthController.homeController();
+  elevationController.homeController();
 }
 
 ////////////////////////////////////////////////////////////////////// loop() //////////////////////////////////////////////////////////////////////
