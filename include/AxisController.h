@@ -24,8 +24,8 @@ class AxisController
             { motionProfiler.setLimits(MaxVelocityLimit, maxAccelerationLimit); maxVelocityLimit = MaxVelocityLimit; };
 
         // kP, kD, and gravity feedforward compensation are all unitless. acceptable error is in degrees. acceptable velocity error is in deg/s
-        void setTuningParameters(float _FF, float _kP, float _kD, float gravityFeedFowardCompensation, float AcceptableError, float AcceptableVelocityError)
-            { FF = _FF; kP = _kP; kD = _kD; gravFFComp = gravityFeedFowardCompensation; acceptableError = AcceptableError; acceptableVelocityError = AcceptableVelocityError; };
+        void setTuningParameters(float _FF, float _kP, float _kI, float _kD, float gravityFeedFowardCompensation, float AcceptableError, float AcceptableVelocityError)
+            { FF = _FF; kP = _kP; kI = _kI; kD = _kD; gravFFComp = gravityFeedFowardCompensation; acceptableError = AcceptableError; acceptableVelocityError = AcceptableVelocityError; };
 
         // set how often we want the loop to run. 
         // actually updating the control loop will be handled internally with a timer, to ensure accurate control loop timing.
@@ -98,6 +98,10 @@ class AxisController
                     ((position < 90) && (dir > 0)) ||  ((position > 90) && (dir < 0))
                     === (functionally equivalent to)
                     ((position-90)*dir) < 0
+
+                    this is arguably less efficent from a clock cycle PoV, but it's not enough to matter. 
+                    (subtraction & multiplication vs just a bunch of comparisions)
+                    since our loop time is 10ms, we have plenty of time.
                     */
                     float applyGravFF = (((sensor->getDistFrom0()-90)*dir) < 0) ? 1.0 : 0.0;
 

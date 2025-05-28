@@ -83,9 +83,9 @@ void setup()
 
   configureHardware(); // setup pins and tuning parameters for controllers
 
-  debugPrintTimer.begin(debugPrint, 100000); // 100000 in µs = 100ms = 0.1s
+  debugPrintTimer.begin(debugPrint, 100ms); // thank you std::chrono for readable units
 
-  blinkTimer.begin([]{digitalToggle(LED_POLARIS);}, 1000ms); // 1000000 in us = 1s blink
+  blinkTimer.begin([]{digitalToggle(LED_POLARIS);}, 1s); // thank you std::chrono for readable units
 
   // start actual things
   azimuthController.begin();  
@@ -138,7 +138,7 @@ void configureHardware()
 
   // configure azimuth motion controller
   azimuthController.setPhysicalLimits(azimuthMaxVelocity, azimuthMaxAcceleration);
-  azimuthController.setTuningParameters(azimuthFF, azimuthkP, azimuthkD, 0.0, azimuthAcceptableError, azimuthAcceptableVelocityError);
+  azimuthController.setTuningParameters(azimuthFF, azimuthkP, azimuthkI, azimuthkD, 0.0, azimuthAcceptableError, azimuthAcceptableVelocityError);
   azimuthController.setLoopTimeStep(controlLoopTimeStep);
 
   // configure elevation hardware
@@ -150,7 +150,7 @@ void configureHardware()
 
   // configure elevation motion controller
   elevationController.setPhysicalLimits(elevationMaxVelocity, elevationMaxAcceleration);
-  elevationController.setTuningParameters(elevationFF, elevationkP, elevationkD, elevationGravityCompFactor, elevationAcceptableError, elevationAcceptableVelocityError);
+  elevationController.setTuningParameters(elevationFF, elevationkP, elevationkI, elevationkD, elevationGravityCompFactor, elevationAcceptableError, elevationAcceptableVelocityError);
   elevationController.setLoopTimeStep(controlLoopTimeStep);
 
 }

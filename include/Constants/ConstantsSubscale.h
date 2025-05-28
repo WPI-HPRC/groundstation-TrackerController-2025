@@ -12,6 +12,7 @@ constexpr float azimuthAcceptableVelocityError = 0.0; // degrees per second
 
 constexpr float azimuthFF   = 0.0; // technically units of velocity
 constexpr float azimuthkP   = 0.0; // unitless
+constexpr float azimuthkI   = 0.0; // unitless
 constexpr float azimuthkD   = 0.0; // unitless
 
 constexpr float elevationMaxVelocity      = 10.0; // degrees per second
@@ -22,6 +23,7 @@ constexpr float elevationAcceptableVelocityError = 0.0; // degrees per second
 
 constexpr float elevationFF   = 0.0; // technically units of velocity
 constexpr float elevationkP   = 0.0; // unitless
+constexpr float elevationkI   = 0.0; // unitless
 constexpr float elevationkD   = 0.0; // unitless
 constexpr float elevationGravityCompFactor = 0.0; // technically not unitless, but determined emperically, not by calculation
 
