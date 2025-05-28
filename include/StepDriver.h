@@ -13,9 +13,8 @@ class StepDriver
         void setPins(uint8_t DirectionPin, uint8_t StepPin, uint8_t DirectionPin2, uint8_t StepPin2) // double driver
             { 
                 dirPin = DirectionPin; stepPin = StepPin; 
-                if(DirectionPin2 != -1 && StepPin2 != -1){
+                if(DirectionPin2 != 255 && StepPin2 != 255){ // check for undefined, this is for cases where we are only using a single driver (subscale) but don't want to change code
                     dirPin2 = DirectionPin2; stepPin2 = StepPin2; doubleDriver = true;
-                    SerialUSB.println("double driver!");
                 }
             };
 

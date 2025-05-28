@@ -81,6 +81,6 @@ constexpr uint8_t elevationPotentiometer = 17;
 
 constexpr uint8_t elevationStep = 25;
 constexpr uint8_t elevationDirection = 24;
+constexpr uint8_t elevationEnable = 7;
 constexpr uint8_t elevationStep2 = 8;
 constexpr uint8_t elevationDirection2 = 20;
-constexpr uint8_t elevationEnable = 7;

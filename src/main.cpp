@@ -29,7 +29,7 @@
 #include "IMU.h"
 
 // this handles our interfacing to the outside world
-// #include "StreamInterface.h"
+#include "StreamInterface.h"
 
 // temporary serial interface code for tuning / bringup
 #include "TunerInterface.h"
@@ -53,11 +53,15 @@ AxisController elevationController(&elevationMotorDriver, elevationEnable, eleva
 // IMU abstraction object over both chips for accel, gyro & mag
 IMU imu;
 
+// serial interface
+// StreamInterface serialInterface(&SerialUSB);
+
 // tuning interface
 TunerInterface tuner(&SerialUSB);
 
-TeensyTimerTool::PeriodicTimer debugPrintTimer;
-TeensyTimerTool::PeriodicTimer blinkTimer;
+TeensyTimerTool::PeriodicTimer debugPrintTimer(TeensyTimerTool::TCK);
+TeensyTimerTool::PeriodicTimer blinkTimer(TeensyTimerTool::TCK);
+
 
 ////////////////////////////////////////////////////////////////////// Local Function Declarations //////////////////////////////////////////////////////////////////////
 
@@ -81,7 +85,7 @@ void setup()
 
   debugPrintTimer.begin(debugPrint, 100000); // 100000 in µs = 100ms = 0.1s
 
-  blinkTimer.begin([]{digitalToggle(LED_POLARIS);}, 1000000); // 1000000 in us = 1s blink
+  blinkTimer.begin([]{digitalToggle(LED_POLARIS);}, 1000ms); // 1000000 in us = 1s blink
 
   // start actual things
   azimuthController.begin();  
@@ -101,6 +105,7 @@ void setup()
   // elevationMotorDriver.setVelocityCommand(2);
   // azimuthController.homeController();
   // elevationController.homeController();
+
 }
 
 ////////////////////////////////////////////////////////////////////// loop() //////////////////////////////////////////////////////////////////////
@@ -118,8 +123,8 @@ void debugPrint()
   // azimuthController.debugPrint(&SerialUSB);
   // elevationController.debugPrint(&SerialUSB);
   // azimuthSensor->debugPrint(&SerialUSB);
-  elevationSensor->update();
-  elevationSensor->debugPrint(&SerialUSB);
+  // elevationSensor->update();
+  // elevationSensor->debugPrint(&SerialUSB);
 }
 
 
