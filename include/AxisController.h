@@ -20,8 +20,8 @@ class AxisController
             { sensor = PositionalSensor; driver = StepperDriver; enablePin = EnablePin; };
 
         // set physical limits for this axis. units are degrees per second (seconds squared and cubed where appropriate)
-        void setPhysicalLimits(float MaxVelocityLimit, float maxAccelerationLimit, float maxJerkLimit)
-            { motionProfiler.setLimits(MaxVelocityLimit, maxAccelerationLimit, maxJerkLimit); maxVelocityLimit = MaxVelocityLimit; };
+        void setPhysicalLimits(float MaxVelocityLimit, float maxAccelerationLimit)
+            { motionProfiler.setLimits(MaxVelocityLimit, maxAccelerationLimit); maxVelocityLimit = MaxVelocityLimit; };
 
         // kP, kD, and gravity feedforward compensation are all unitless. acceptable error is in degrees.
         void setTuningParameters(float _FF, float _kP, float _kD, float gravityFeedFowardCompensation, float AcceptableError, float AcceptableVelocityError)
@@ -67,6 +67,7 @@ class AxisController
                     [[fallthrough]]; // we intentionally fall through here to continue to run the motion profiler while stopping
 
                 case State::running:
+// REWRITE THIS SECTION                
                     motionProfiler.update(timeStep); // update our motion profiler so we can get the new desired pos/vel data
                     error = motionProfiler.getDesiredPosition() - sensor->getDistFrom0();
                     

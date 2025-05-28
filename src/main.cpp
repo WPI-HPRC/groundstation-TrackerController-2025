@@ -1,8 +1,8 @@
 #include <Arduino.h>
 
 // CHOOSE DEPLOY PLATFORM HERE ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#define REAL
-// #define SUBSCALE
+// #define REAL
+#define SUBSCALE
 // #define SIM // NOTE: this will be implemented in the future at some point. whether it will be HITL is TBD
 
 ////////////////////////////////////////////////////////////////////// Includes //////////////////////////////////////////////////////////////////////
@@ -10,9 +10,11 @@
 // platform specific defines
 #ifdef REAL
   #include "Constants/ConstantsReal.h"
-#elif SUBSCALE
+#endif
+#ifdef SUBSCALE
   #include "Constants/ConstantsSubscale.h"
-#elif SIM
+#endif
+#ifdef SIM
   #include "Constants/ConstantsSim.h"
 #endif // platform specific defines
 
@@ -106,12 +108,6 @@ void setup()
 
 ////////////////////////////////////////////////////////////////////// loop() //////////////////////////////////////////////////////////////////////
 
-// select controller for tuning
-AxisController tuningController = azimuthController;
-Sensor* tuningSensor = azimuthSensor;
-// AxisController tuningController = elevationController;
-// Sensor* tuningSensor = elevationSensor;
-
 // as everything is run through timers, loop goes unused
 void loop() 
 {
@@ -136,10 +132,10 @@ void configureHardware()
   azimuthSensor->setSensorPins(azimuthEncoderA, azimuthEncoderB, azimuthLimitSwitch);
   azimuthSensor->setPhysicalConversionConstant(azimuthConversionRatio);
   azimuthMotorDriver.setPins(azimuthDirection, azimuthStep);
-  azimuthMotorDriver.setPhysicalConstants(DegreesPerStep, microStepResolution);
+  azimuthMotorDriver.setPhysicalConstants(DegreesPerStepAzimuth, microStepResolution);
 
   // configure azimuth motion controller
-  azimuthController.setPhysicalLimits(azimuthMaxVelocity, azimuthMaxAcceleration, azimuthMaxJerk);
+  azimuthController.setPhysicalLimits(azimuthMaxVelocity, azimuthMaxAcceleration);
   azimuthController.setTuningParameters(azimuthFF, azimuthkP, azimuthkD, 0.0, azimuthAcceptableError, azimuthAcceptableVelocityError);
   azimuthController.setLoopTimeStep(controlLoopTimeStep);
 
@@ -148,70 +144,11 @@ void configureHardware()
   elevationSensor->setPhysicalConversionConstant(elevationConversionRatio);
   elevationSensor->setZero(elevationMinimumValue); // we only do this for the elevation, azimuth zeroes itself
   elevationMotorDriver.setPins(elevationDirection, elevationStep, elevationDirection2, elevationStep2);
-  elevationMotorDriver.setPhysicalConstants(DegreesPerStep, microStepResolution);
+  elevationMotorDriver.setPhysicalConstants(DegreesPerStepElevation, microStepResolution);
 
   // configure elevation motion controller
-  elevationController.setPhysicalLimits(elevationMaxVelocity, elevationMaxAcceleration, elevationMaxJerk);
+  elevationController.setPhysicalLimits(elevationMaxVelocity, elevationMaxAcceleration);
   elevationController.setTuningParameters(elevationFF, elevationkP, elevationkD, elevationGravityCompFactor, elevationAcceptableError, elevationAcceptableVelocityError);
   elevationController.setLoopTimeStep(controlLoopTimeStep);
 
-}
-
-
-float actualVel;
-float actualAcc;
-void runTuner()
-{
-  // check for tuner updates
-  tuner.readSerial();
-  if(tuner.newData()){
-    while(!tuningController.smoothStopController()){};
-    tuningController.setPhysicalLimits(tuner.getMaxVel(), tuner.getMaxAccel(), tuner.getMaxJerk());
-    // tuningController.setTuningParameters(tuner.getKP(), tuner.getKD(), tuner.getGravFF(), tuner.getAcceptableError(), tuner.getAcceptableVelocityError());
-    tuningController.setHoldBehavior(tuner.getBrake() ? HoldBehavior::brakeMode : HoldBehavior::coastMode);
-    // now that we've applied our new stuff, we can re-enable the controller
-    tuningController.startController();
-    // now give it a target
-    tuningController.setTarget(tuner.getTarget());
-  }
-
-
-  // send data to tuner
-  // calculateVelAccel(tuningSensor->getDistFrom0());
-  sendTunerData(tuningController.motionProfiler.getDesiredPosition(), tuningSensor->getDistFrom0(),
-                tuningController.motionProfiler.getDesiredVelocity(), actualVel,
-                tuningController.motionProfiler.getDesiredAcceleration(), actualAcc);
-}
-
-float prevPos;
-float prevVel;
-unsigned long prevTime = 0;
-void calculateVelAccel(float actualPos)
-{
-  unsigned long currentTime = millis();
-  float dt = (currentTime - prevTime) / 1000.0;  // Time difference in seconds
-
-  // Update actual velocity and acceleration
-  actualVel = (actualPos - prevPos) / dt;  // Velocity = (position change) / (time change)
-  actualAcc = (actualVel - prevVel) / dt;  // Acceleration = (velocity change) / (time change)
-
-  // Update previous values for next calculation
-  prevTime = currentTime;
-  prevPos = actualPos;
-  prevVel = actualVel;
-}
-
-void sendTunerData(float desiredPos, float actualPos, float desiredVel, float actualVelocity, float desiredAcc, float actualAccel)
-{
-  // Create a formatted string with all the data
-  String message = "MOTION_DATA,";
-  message += String(desiredPos, 4) + ",";
-  message += String(actualPos, 4) + ",";
-  message += String(desiredVel, 4) + ",";
-  message += String(actualVelocity, 4) + ",";
-  message += String(desiredAcc, 4) + ",";
-  message += String(actualAccel, 4);
-
-  // Send the message over serial
-  Serial.println(message);
 }

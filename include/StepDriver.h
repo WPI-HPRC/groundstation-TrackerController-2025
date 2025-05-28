@@ -11,7 +11,13 @@ class StepDriver
         void setPins(uint8_t DirectionPin, uint8_t StepPin) // single driver
             { doubleDriver = false; dirPin = DirectionPin; stepPin = StepPin; };
         void setPins(uint8_t DirectionPin, uint8_t StepPin, uint8_t DirectionPin2, uint8_t StepPin2) // double driver
-            { doubleDriver = true; dirPin = DirectionPin; stepPin = StepPin; dirPin2 = DirectionPin2; stepPin2 = StepPin2; };
+            { 
+                dirPin = DirectionPin; stepPin = StepPin; 
+                if(DirectionPin2 != -1 && StepPin2 != -1){
+                    dirPin2 = DirectionPin2; stepPin2 = StepPin2; doubleDriver = true;
+                    SerialUSB.println("double driver!");
+                }
+            };
 
         void setPhysicalConstants(float degreesPerStep, float microstepResolution)
             { degPerStep = degreesPerStep; microstepRes = microstepResolution; };
