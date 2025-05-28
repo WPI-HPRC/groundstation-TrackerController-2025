@@ -74,8 +74,6 @@ class AxisController
                     // calculate error from desired position in profile so we can drive our PID controller
                     error = motionProfiler.getDesiredPosition() - sensor->getDistFrom0();
                     velError = motionProfiler.getDesiredVelocity() - sensor->getVelocity();
-                    
-                    // velocityCommand = FF + (kP * error) + (kD * motionProfiler.getDesiredVelocity()) + getGravityFF();
 
                     // determine direction to apply feedfowards
                     float dir = (motionProfiler.getDesiredVelocity() > 0) ? 1.0 : -1.0;
@@ -83,6 +81,7 @@ class AxisController
                     /*
                     we only want to apply the gravity feedfoward on upwards motion 
                     (which is when we're actually fighting gravity)
+                    
                     the two cases where this is true are:
                         position < 90 AND direction > 0 (forward motion)
                         position > 90 AND direction < 0 (backward motion)
@@ -100,7 +99,7 @@ class AxisController
                     ((position-90)*dir) < 0
 
                     this is arguably less efficent from a clock cycle PoV, but it's not enough to matter. 
-                    (subtraction & multiplication vs just a bunch of comparisions)
+                    (subtraction & multiplication VS just a bunch of comparisions)
                     since our loop time is 10ms, we have plenty of time.
                     */
                     float applyGravFF = (((sensor->getDistFrom0()-90)*dir) < 0) ? 1.0 : 0.0;
@@ -119,7 +118,7 @@ class AxisController
             
                     /*
                     this is an anti-windup measure that prevents integration if the actuator is saturated
-                    tl:dr: 
+                    laymans terms: 
                         if the motor is already running at max speed,
                         we don't want to accumulate integral error bc
                         the motor is already doing as much as it can
@@ -130,7 +129,7 @@ class AxisController
                         integralError = tempIntegralError;
                     }
                     
-                    // perform a different error calculation to our actual goal pose for these
+                    // perform a different error calculation from our actual goal pose for these
                     reachedPosGoal = ( fabs(goalPosition - sensor->getDistFrom0()) < acceptableError);
                     reachedVelGoal = ( fabs(goalVelocity - sensor->getVelocity()) < acceptableVelocityError);
                     

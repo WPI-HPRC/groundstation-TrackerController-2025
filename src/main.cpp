@@ -113,6 +113,8 @@ void setup()
 // as everything is run through timers, loop goes unused
 void loop() 
 {
+  // this is called implicitly
+  // yield(); 
 }
 
 
