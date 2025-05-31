@@ -39,18 +39,19 @@ constexpr float azimuthMainGearTeeth = 480; // gear teeth
 constexpr float azimuthMotorPinionTeeth = 40; // gear teeth
 constexpr float azimuthEncoderPinionTeeth = 40; // gear teeth
 
+constexpr float azimuthGearRatio = (azimuthMainGearTeeth/azimuthMotorPinionTeeth);
+
 constexpr float elevationGearboxReduction = 20; // ratio
 constexpr float elevationChainReduction = 3; // ratio
 
-constexpr float elevationTotalReduction = elevationGearboxReduction*elevationChainReduction; // ratio
+constexpr float elevationGearRatio = (elevationGearboxReduction * elevationChainReduction);
 
 constexpr int azimuthEncoderActualTicksPerRev = 600; // encoder ticks per rev
 constexpr float azimuthEncoderTicksPerRev = azimuthEncoderActualTicksPerRev*4; // quadurature counting means 4 counts per pulse
 
 constexpr int microStepResolution = 40000;
-constexpr float DegreesPerStep = 1.8f;
-constexpr float DegreesPerStepAzimuth = DegreesPerStep;
-constexpr float DegreesPerStepElevation = DegreesPerStep;
+constexpr float DegreesPerStepAzimuth = 1.8f;
+constexpr float DegreesPerStepElevation = 1.8f;
 
 ////////////////////////////////////////////////////////////////////// Sensor Calibration Values //////////////////////////////////////////////////////////////////////
 

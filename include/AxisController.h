@@ -56,7 +56,7 @@ class AxisController
                     break;
 
                 case State::homing: // homing state
-                    velocityCommand = -30;
+                    velocityCommand = -homingVelocity;
                     if(sensor->isZeroed()){ state = State::stopped; } // internal state transition to stopped when we have homed
                     break;
 
