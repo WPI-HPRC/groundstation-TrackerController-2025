@@ -20,12 +20,12 @@ class AxisController
             { sensor = PositionalSensor; driver = StepperDriver; enablePin = EnablePin; };
 
         // set physical limits for this axis. units are degrees per second (seconds squared where appropriate)
-        void setPhysicalLimits(float MaxVelocityLimit, float maxAccelerationLimit)
-            { motionProfiler.setLimits(MaxVelocityLimit, maxAccelerationLimit); maxVelocityLimit = MaxVelocityLimit; };
+        void setPhysicalLimits(float MaxVelocityLimit, float maxAccelerationLimit, float GearRatio)
+            { motionProfiler.setLimits(MaxVelocityLimit, maxAccelerationLimit); maxVelocityLimit = MaxVelocityLimit; gearRatio = GearRatio; };
 
         // kP, kD, and gravity feedforward compensation are all unitless. acceptable error is in degrees. acceptable velocity error is in deg/s
-        void setTuningParameters(float _FF, float _kP, float _kI, float _kD, float gravityFeedFowardCompensation, float AcceptableError, float AcceptableVelocityError)
-            { FF = _FF; kP = _kP; kI = _kI; kD = _kD; gravFFComp = gravityFeedFowardCompensation; acceptableError = AcceptableError; acceptableVelocityError = AcceptableVelocityError; };
+        void setTuningParameters(float _FF, float _kP, float _kI, float _kD, float gravityFeedFowardCompensation, float AcceptableError, float AcceptableVelocityError, float HomingVelocity)
+            { FF = _FF; kP = _kP; kI = _kI; kD = _kD; gravFFComp = gravityFeedFowardCompensation; acceptableError = AcceptableError; acceptableVelocityError = AcceptableVelocityError; homingVelocity = HomingVelocity; };
 
         // set how often we want the loop to run. 
         // actually updating the control loop will be handled internally with a timer, to ensure accurate control loop timing.
@@ -39,7 +39,7 @@ class AxisController
 
         void updateLoop()
         {
-            sensor->update(); // run an update loop for our sensor so we chilling on position and velocity
+            sensor->update(); // run an update loop for our sensor so we chilling on position
 
             // generate commanded velocity depending on operating state
             switch(state)
@@ -50,10 +50,13 @@ class AxisController
 
                 case State::stopped: // we've reached our goal position, waiting for new position / drift off of position
                     velocityCommand = 0;
+                    if(fabs(goalPosition - sensor->getDistFrom0()) > acceptableError){
+                        state = State::running;
+                    }
                     break;
 
                 case State::homing: // homing state
-                    velocityCommand = -0.5;
+                    velocityCommand = -30;
                     if(sensor->isZeroed()){ state = State::stopped; } // internal state transition to stopped when we have homed
                     break;
 
@@ -69,14 +72,17 @@ class AxisController
 
                 case State::running: // actually running to desired pose
 
-                    motionProfiler.update(timeStep, sensor->getDistFrom0(), sensor->getVelocity()); // update our motion profiler so we can get the new desired pos/vel data
+                    // motionProfiler.update(timeStep, sensor->getDistFrom0(), sensor->getVelocity()); // update our motion profiler so we can get the new desired pos/vel data
 
                     // calculate error from desired position in profile so we can drive our PID controller
-                    error = motionProfiler.getDesiredPosition() - sensor->getDistFrom0();
-                    velError = motionProfiler.getDesiredVelocity() - sensor->getVelocity();
+                    // error = motionProfiler.getDesiredPosition() - sensor->getDistFrom0();
+                    // velError = motionProfiler.getDesiredVelocity() - sensor->getVelocity();
+
+                    error = goalPosition - sensor->getDistFrom0();
+                    velError = goalVelocity - sensor->getVelocity();
 
                     // determine direction to apply feedfowards
-                    float dir = (motionProfiler.getDesiredVelocity() > 0) ? 1.0 : -1.0;
+                    float dir = (error > 0) ? 1.0 : -1.0;
 
                     /*
                     we only want to apply the gravity feedfoward on upwards motion 
@@ -123,15 +129,16 @@ class AxisController
                         we don't want to accumulate integral error bc
                         the motor is already doing as much as it can
                     */
-                    float clampedVelocityCommand = constrain(velocityCommand, -maxVelocityLimit, maxVelocityLimit);
+                    // the velocity limits we set are for the output of the system. we need to multiply them by the output of the gear ratio to get the correct limits
+                    // bc the velocity command is the velocity of the motor output 
+                    float clampedVelocityCommand = constrain(velocityCommand, -maxVelocityLimit*gearRatio, maxVelocityLimit*gearRatio);
                     if(clampedVelocityCommand == velocityCommand){
                         // if the motor output isn't being saturated, then integrate the error
                         integralError = tempIntegralError;
                     }
                     
-                    // perform a different error calculation from our actual goal pose for these
-                    reachedPosGoal = ( fabs(goalPosition - sensor->getDistFrom0()) < acceptableError);
-                    reachedVelGoal = ( fabs(goalVelocity - sensor->getVelocity()) < acceptableVelocityError);
+                    reachedPosGoal = ( fabs(error) < acceptableError);
+                    reachedVelGoal = ( fabs(velError) < acceptableVelocityError);
                     
                     // we care about both velocity and position for this case
                     reachedGoal = reachedPosGoal && reachedVelGoal;
@@ -142,7 +149,9 @@ class AxisController
             }
 
             // constrain our command to be within our maximum allowable velocity
-            velocityCommand = constrain(velocityCommand, -maxVelocityLimit, maxVelocityLimit);
+            // the velocity limits we set are for the output of the system. we need to multiply them by the output of the gear ratio to get the correct limits
+            // bc the velocity command is the velocity of the motor output 
+            velocityCommand = constrain(velocityCommand, -maxVelocityLimit*gearRatio, maxVelocityLimit*gearRatio);
 
             if(state != State::disabled) // this check is technically unnecessary, but is another safety check
             {
@@ -166,7 +175,7 @@ class AxisController
             driver->begin();
             pinMode(enablePin, OUTPUT);
             setHoldBehavior(HoldBehavior::coastMode); // begin in a disabled state for on-boot calibration
-            applyHoldBehavior(getHoldBehavior());            
+            applyHoldBehavior(getHoldBehavior());
             
             controlLoopTimer.begin([this]() { this->updateLoop(); }, timeStep); // in µs
 
@@ -226,15 +235,18 @@ class AxisController
         {
             goalPosition = target;
             motionProfiler.setTarget(goalPosition, sensor->getDistFrom0(), sensor->getVelocity());
+            state = State::running;
         };
 
         void debugPrint(Stream *printInterface)
         {
             printInterface->print("State: "); printInterface->print(getCurrentState()); printInterface->print(", ");
-            printInterface->print("Commanded Velocity: "); printInterface->print(velocityCommand, 3); printInterface->print(", ");
-            printInterface->print("Goal Position: "); printInterface->print(goalPosition, 3); printInterface->print(", ");
-            printInterface->print("Current Position: "); printInterface->print(sensor->getDistFrom0(), 3); printInterface->print(", ");
+            printInterface->print("Commanded Vel: "); printInterface->print(velocityCommand, 3); printInterface->print(", ");
+            printInterface->print("Goal Pos: "); printInterface->print(goalPosition, 3); printInterface->print(", ");
+            printInterface->print("Current Pos: "); printInterface->print(sensor->getDistFrom0(), 3); printInterface->print(", ");
+            printInterface->print("Current Vel: "); printInterface->print(sensor->getVelocity(), 5); printInterface->print(", ");
             printInterface->print("Error: "); printInterface->print(error, 3); printInterface->print(", ");
+            printInterface->print("Velocity Error: "); printInterface->print(velError, 3); printInterface->print(", ");
             printInterface->println("");
         };
 
@@ -256,6 +268,8 @@ class AxisController
 
         float timeStep; // microseconds (us)
 
+        float gearRatio; // this is output / input 
+
         HoldBehavior desiredHoldBehavior = HoldBehavior::brakeMode;
 
         // tuning parameters
@@ -272,6 +286,8 @@ class AxisController
 
         float goalPosition;
         float goalVelocity = 0.0;
+
+        float homingVelocity;
         
         // these are placed here to gain observability into the system
         float error;

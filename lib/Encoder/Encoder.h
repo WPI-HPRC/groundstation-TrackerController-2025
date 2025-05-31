@@ -154,7 +154,7 @@ public:
 		encoder.position = p;
 	}
 #endif
-private:
+public:
 	Encoder_internal_state_t encoder;
 #ifdef ENCODER_USE_INTERRUPTS
 	uint8_t interrupts_in_use;

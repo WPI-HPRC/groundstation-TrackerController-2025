@@ -31,6 +31,20 @@ class Sensor
 
         virtual ~Sensor() {};
 
+        virtual void updateVelocity(){
+            // time math
+            unsigned long dt = micros() - lastTime;
+            lastTime = micros();
+
+            // SerialUSB.println(dt);
+
+            // SerialUSB.println(currentPos-lastPos);
+
+            // velocity math
+            currentVel = ( (float)(currentPos - lastPos) / (float)dt ) * ((10e4));
+            lastPos = currentPos;             
+        }
+
     protected:
         int64_t currentPos; // use integers internally to prevent any floating point weirdness
         int64_t lastPos;
@@ -43,14 +57,4 @@ class Sensor
         float conversionConstant;
 
         bool zeroed = false;
-
-        void updateVelocity(){
-            // time math
-            unsigned long dt = micros() - lastTime;
-            lastTime = micros();
-
-            // velocity math
-            currentVel = (currentPos - lastPos) / dt;
-            lastPos = currentPos;            
-        }
 };

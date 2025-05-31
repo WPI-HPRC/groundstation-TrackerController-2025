@@ -34,15 +34,13 @@ class PotSensor : public Sensor
 
         void debugPrint(Stream *printInterface)
         {
-            printInterface->print("Current Position: "); printInterface->print(getDistFrom0()); printInterface->print(", ");
+            printInterface->print("Current Position: "); printInterface->print(getDistFrom0()); printInterface->print(", "); 
+            printInterface->print("Current Velocity: "); printInterface->print(currentVel, 20); printInterface->print(", "); 
             printInterface->print("Pot reading: "); printInterface->print(currentPos); printInterface->println();
         }
 
-        // returns 0 in all cases
-        uint8_t update() override
+        void updateVelocity() override
         {
-            currentPos = analogRead(analogPin);
-
             // update velocity
                 // convert to actual degrees
             float currentRealPos = ( (currentPos - zeroPos ) * conversionConstant );
@@ -52,9 +50,29 @@ class PotSensor : public Sensor
             unsigned long dt = micros() - lastTime;
             lastTime = micros();
 
+            // SerialUSB.println(dt);
+
             // velocity math
-            currentVel = (currentRealPos - lastRealPos) / dt;
+            currentVel = ( (currentRealPos - lastRealPos) / dt ) * (10e4);
             lastPos = currentPos;
+        };
+
+        // returns 0 if updated
+        // returns 1 if didn't update a noisy reading
+        uint8_t update() override
+        {
+            float newReading = analogRead(analogPin);
+
+            // SerialUSB.println(abs(newReading-currentPos));
+            if(abs(newReading-currentPos) < 3){
+                return 1;
+            }
+            currentPos = newReading;
+            
+            
+            // currentPos = analogRead(analogPin);
+
+            // updateVelocity();
 
             return 0;
         }

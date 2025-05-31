@@ -16,6 +16,8 @@ constexpr float azimuthkP   = 0.0; // unitless
 constexpr float azimuthkI   = 0.0; // unitless
 constexpr float azimuthkD   = 0.0; // unitless
 
+constexpr float homingVelocity = 0.5; // degrees per second
+
 
 constexpr float elevationMaxVelocity      = 10.0; // degrees per second
 constexpr float elevationMaxAcceleration  = 10.0; // degrees per second^2

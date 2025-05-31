@@ -24,9 +24,10 @@ class EncoderSensor : public Sensor
         // returns 1 if zeroed during loop cycle, 0 otherwise
         uint8_t update() override
         {
+            // encoder.update(&encoder.encoder);
             currentPos = encoder.read() - zeroPos;
 
-            updateVelocity();
+            // updateVelocity();
 
             bool switchState = digitalRead(pinLimit);
             if(switchState != lastSwitchState){ // if we aren't in the same thing, then reset
@@ -54,6 +55,7 @@ class EncoderSensor : public Sensor
         void debugPrint(Stream *printInterface)
         {
             printInterface->print("Current Position: "); printInterface->print(currentPos); printInterface->print(", ");
+            printInterface->print("Current Velocity: "); printInterface->print(getVelocity(), 5); printInterface->print(", ");
             printInterface->print("Zero Position: "); printInterface->print(zeroPos); printInterface->print(", ");
             printInterface->print("Encoder Ticks: "); printInterface->print(encoder.read()); printInterface->print(", ");
             printInterface->print("Limit Switch State: "); printInterface->print(digitalRead(pinLimit)); printInterface->print(", ");
