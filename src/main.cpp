@@ -91,7 +91,7 @@ void setup()
   sensorVelocityTimer.begin([]{azimuthSensor->updateVelocity();elevationSensor->updateVelocity();}, 100ms); // thank you std::chrono for readable units
 
   // start actual things
-  // azimuthController.begin();  
+  azimuthController.begin();  
   elevationController.begin();
 
   // start LEDS
@@ -112,16 +112,15 @@ void setup()
   // pinMode(elevationEnable, OUTPUT); digitalWrite(elevationEnable, LOW);
   // azimuthMotorDriver.setVelocityCommand(5);
   // elevationMotorDriver.setVelocityCommand(-100);
-  // azimuthController.homeController();
+  
+  azimuthController.homeController();
   // elevationController.homeController();
 
 
   delay(10);
 
-  elevationController.setTarget(45);
+  // elevationController.setTarget(45);
   // elevationController.setTarget(90);
-
-
 
 }
 
@@ -140,8 +139,8 @@ void loop()
 void debugPrint()
 {
   // azimuthController.debugPrint(&SerialUSB);
-  elevationController.debugPrint(&SerialUSB);
-  // azimuthSensor->debugPrint(&SerialUSB);
+  // elevationController.debugPrint(&SerialUSB);
+  azimuthSensor->debugPrint(&SerialUSB);
   // elevationSensor->debugPrint(&SerialUSB);
 }
 
