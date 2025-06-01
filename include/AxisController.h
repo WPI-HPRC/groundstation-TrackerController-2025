@@ -33,6 +33,7 @@ class AxisController
         void setLoopTimeStep(float timeStepUs)
         { 
             timeStep = timeStepUs;
+            dt = (1.0/timeStepUs);
             // controlLoopTimer.setPeriod(timeStep);
             // controlLoopTimer.setNextPeriod(timeStep); // why do we have to do it twice?? idk, library quirk
         };
@@ -40,6 +41,9 @@ class AxisController
         void updateLoop()
         {
             sensor->update(); // run an update loop for our sensor so we chilling on position
+
+            error = goalPosition - sensor->getDistFrom0();
+            velError = (error - prevError) / dt;
 
             // generate commanded velocity depending on operating state
             switch(state)
@@ -78,9 +82,6 @@ class AxisController
                     // error = motionProfiler.getDesiredPosition() - sensor->getDistFrom0();
                     // velError = motionProfiler.getDesiredVelocity() - sensor->getVelocity();
 
-                    error = goalPosition - sensor->getDistFrom0();
-                    velError = goalVelocity - sensor->getVelocity();
-
                     // determine direction to apply feedfowards
                     float dir = (error > 0) ? 1.0 : -1.0;
 
@@ -111,7 +112,6 @@ class AxisController
                     float applyGravFF = (((sensor->getDistFrom0()-90)*dir) < 0) ? 1.0 : 0.0;
 
                     // calculate integral error
-                    double dt = (1.0/timeStep);
                     float tempIntegralError = integralError + error * dt;
 
                     velocityCommand = 
@@ -167,6 +167,8 @@ class AxisController
                 driver->setVelocityCommand(0.0); // safety measure
                 applyHoldBehavior(getHoldBehavior()); // make sure we update our hold behavior/enable so we chillin on that
             }
+
+            prevError = error;
         };
 
         uint8_t begin()
@@ -267,6 +269,7 @@ class AxisController
         bool reachedGoal = false;
 
         float timeStep; // microseconds (us)
+        float dt; 
 
         float gearRatio; // this is output / input 
 
@@ -291,6 +294,7 @@ class AxisController
         
         // these are placed here to gain observability into the system
         float error;
+        float prevError;
         float velError;
         float integralError;
 
