@@ -43,7 +43,7 @@ class AxisController
             sensor->update(); // run an update loop for our sensor so we chilling on position
 
             error = goalPosition - sensor->getDistFrom0();
-            velError = (error - prevError) / dt;
+            velError = goalVelocity - sensor->getVelocity();
 
             // generate commanded velocity depending on operating state
             switch(state)
@@ -52,9 +52,11 @@ class AxisController
                     velocityCommand = 0;
                     break;
 
+                    // this is unused lowkey?
                 case State::stopped: // we've reached our goal position, waiting for new position / drift off of position
                     velocityCommand = 0;
-                    if(fabs(goalPosition - sensor->getDistFrom0()) > acceptableError){
+                    integralError = 0; // reset integral error if we're stopped and in our position
+                    if(fabs(error) > acceptableError){
                         state = State::running;
                     }
                     break;
@@ -143,7 +145,7 @@ class AxisController
                     // we care about both velocity and position for this case
                     reachedGoal = reachedPosGoal && reachedVelGoal;
 
-                    if(reachedPosGoal && reachedVelGoal){ state = State::stopped; }; 
+                    // if(reachedPosGoal && reachedVelGoal){ state = State::stopped; }; 
 
                     break;
             }
@@ -249,6 +251,7 @@ class AxisController
             printInterface->print("Current Vel: "); printInterface->print(sensor->getVelocity(), 5); printInterface->print(", ");
             printInterface->print("Error: "); printInterface->print(error, 3); printInterface->print(", ");
             printInterface->print("Velocity Error: "); printInterface->print(velError, 3); printInterface->print(", ");
+            printInterface->print("Integral Error: "); printInterface->print(integralError, 3); printInterface->print(", ");
             printInterface->println("");
         };
 

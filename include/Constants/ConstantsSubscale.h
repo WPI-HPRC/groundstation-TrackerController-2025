@@ -18,16 +18,16 @@ constexpr float azimuthkD   = 0.0; // unitless
 constexpr float homingVelocity = 30; // degrees per second
 
 
-constexpr float elevationMaxVelocity      = 100.0; // degrees per second
-constexpr float elevationMaxAcceleration  = 10.0; // degrees per second^2
+constexpr float elevationMaxVelocity      = 200.0; // degrees per second
+constexpr float elevationMaxAcceleration  = 100.0; // degrees per second^2
 
-constexpr float elevationAcceptableError = 2.0; // degrees
-constexpr float elevationAcceptableVelocityError = 1.0; // degrees per second
+constexpr float elevationAcceptableError = 2.5; // degrees
+constexpr float elevationAcceptableVelocityError = 0.5; // degrees per second
 
 constexpr float elevationFF   = 10.0; // technically units of velocity
-constexpr float elevationkP   = 100.0; // unitless
-constexpr float elevationkI   = 5.0; // unitless
-constexpr float elevationkD   = 0.0; // unitless
+constexpr float elevationkP   = 70.0; // unitless
+constexpr float elevationkI   = 10.0; // unitless
+constexpr float elevationkD   = 10.0; // unitless
 constexpr float elevationGravityCompFactor = 0.0; // technically not unitless, but determined emperically, not by calculation
 
 constexpr float controlLoopTimeStep = 10000; // us - 10000us = 10ms = 100Hz control loop update rate

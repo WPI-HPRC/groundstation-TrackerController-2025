@@ -120,7 +120,7 @@ void setup()
   delay(10);
 
   // elevationController.setTarget(45);
-  // elevationController.setTarget(90);
+  elevationController.setTarget(90);
 
 }
 
@@ -139,8 +139,8 @@ void loop()
 void debugPrint()
 {
   // azimuthController.debugPrint(&SerialUSB);
-  // elevationController.debugPrint(&SerialUSB);
-  azimuthSensor->debugPrint(&SerialUSB);
+  elevationController.debugPrint(&SerialUSB);
+  // azimuthSensor->debugPrint(&SerialUSB);
   // elevationSensor->debugPrint(&SerialUSB);
 }
 
