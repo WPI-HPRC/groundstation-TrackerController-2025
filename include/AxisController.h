@@ -20,8 +20,8 @@ class AxisController
             { sensor = PositionalSensor; driver = StepperDriver; enablePin = EnablePin; };
 
         // set physical limits for this axis. units are degrees per second (seconds squared where appropriate)
-        void setPhysicalLimits(float MaxVelocityLimit, float maxAccelerationLimit, float GearRatio)
-            { motionProfiler.setLimits(MaxVelocityLimit, maxAccelerationLimit); maxVelocityLimit = MaxVelocityLimit; gearRatio = GearRatio; };
+        void setPhysicalLimits(float MaxVelocityLimit, float MaxAccelerationLimit, float GearRatio)
+            { motionProfiler.setLimits(MaxVelocityLimit, MaxAccelerationLimit); maxVelocityLimit = MaxVelocityLimit; maxAccelerationLimit = MaxAccelerationLimit; gearRatio = GearRatio; };
 
         // kP, kD, and gravity feedforward compensation are all unitless. acceptable error is in degrees. acceptable velocity error is in deg/s
         void setTuningParameters(float _FF, float _kP, float _kI, float _kD, float gravityFeedFowardCompensation, float AcceptableError, float AcceptableVelocityError, float HomingVelocity)
@@ -133,8 +133,29 @@ class AxisController
                     */
                     // the velocity limits we set are for the output of the system. we need to multiply them by the output of the gear ratio to get the correct limits
                     // bc the velocity command is the velocity of the motor output 
+                    bool velocityLimitApplied = true;
                     float clampedVelocityCommand = constrain(velocityCommand, -maxVelocityLimit*gearRatio, maxVelocityLimit*gearRatio);
                     if(clampedVelocityCommand == velocityCommand){
+                        velocityLimitApplied = false;
+                    }
+                    velocityCommand = clampedVelocityCommand;
+                    // constrain our velocity command to be within the maximum allowed acceleration
+                    /*
+                        we first figure out what the change in velocity between loop cycles is
+                        constrain that change in velocity to our max acceleration
+                        then reapply it to our previously stored velocity command
+                    */
+                    float deltaV = velocityCommand - prevVelocityCommand;
+                    float maxDeltaV = maxAccelerationLimit * gearRatio * 0.01;
+                    deltaV = constrain(deltaV, -maxDeltaV, maxDeltaV);
+                    velocityCommand = prevVelocityCommand + deltaV;
+                    
+                    bool accelLimitApplied = true;
+                    if(velocityCommand == clampedVelocityCommand){
+                        accelLimitApplied = false;
+                    }
+
+                    if(!velocityLimitApplied && !accelLimitApplied){
                         // if the motor output isn't being saturated, then integrate the error
                         integralError = tempIntegralError;
                     }
@@ -170,6 +191,7 @@ class AxisController
                 applyHoldBehavior(getHoldBehavior()); // make sure we update our hold behavior/enable so we chillin on that
             }
 
+            prevVelocityCommand = velocityCommand;
             prevError = error;
         };
 
@@ -286,6 +308,7 @@ class AxisController
         float gravFFComp;
 
         float maxVelocityLimit;
+        float maxAccelerationLimit;
 
         float acceptableError;
         float acceptableVelocityError;
@@ -302,6 +325,7 @@ class AxisController
         float integralError;
 
         float velocityCommand;
+        float prevVelocityCommand;
 
         // gravity feedfoward
         float getGravityFF()

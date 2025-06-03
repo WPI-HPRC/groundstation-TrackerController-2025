@@ -25,9 +25,9 @@ constexpr float elevationAcceptableError = 2.5; // degrees
 constexpr float elevationAcceptableVelocityError = 0.5; // degrees per second
 
 constexpr float elevationFF   = 10.0; // technically units of velocity
-constexpr float elevationkP   = 70.0; // unitless
-constexpr float elevationkI   = 10.0; // unitless
-constexpr float elevationkD   = 10.0; // unitless
+constexpr float elevationkP   = 1.0; // unitless
+constexpr float elevationkI   = 0.5; // unitless
+constexpr float elevationkD   = 1.0; // unitless
 constexpr float elevationGravityCompFactor = 0.0; // technically not unitless, but determined emperically, not by calculation
 
 constexpr float controlLoopTimeStep = 10000; // us - 10000us = 10ms = 100Hz control loop update rate
