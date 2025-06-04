@@ -11,7 +11,12 @@ class StepDriver
         void setPins(uint8_t DirectionPin, uint8_t StepPin) // single driver
             { doubleDriver = false; dirPin = DirectionPin; stepPin = StepPin; };
         void setPins(uint8_t DirectionPin, uint8_t StepPin, uint8_t DirectionPin2, uint8_t StepPin2) // double driver
-            { doubleDriver = true; dirPin = DirectionPin; stepPin = StepPin; dirPin2 = DirectionPin2; stepPin2 = StepPin2; };
+            { 
+                dirPin = DirectionPin; stepPin = StepPin; 
+                if(DirectionPin2 != 255 && StepPin2 != 255){ // check for undefined, this is for cases where we are only using a single driver (subscale) but don't want to change code
+                    dirPin2 = DirectionPin2; stepPin2 = StepPin2; doubleDriver = true;
+                }
+            };
 
         void setPhysicalConstants(float degreesPerStep, float microstepResolution)
             { degPerStep = degreesPerStep; microstepRes = microstepResolution; };
@@ -38,11 +43,15 @@ class StepDriver
         // if you wish to set the velocity but not start outputting steps, set the second argument to false
         void setVelocityCommand(float setVelocity, bool startAutomatically = true)
         {
+            if(setVelocity == 0.0){stop(); return; };
             // Convert velocity command to step frequency
             double stepFreq = abs(setVelocity) / (degPerStep / microstepRes);
             bool dir = setVelocity >= 0;
             setDirection(dir);
+            
+            // SerialUSB.println(stepFreq);
             updateFrequency(stepFreq);
+            
 
             if(startAutomatically){ start(); };
         };
@@ -53,7 +62,7 @@ class StepDriver
 
 
     private:
-        TeensyTimerTool::PeriodicTimer timer;
+        TeensyTimerTool::PeriodicTimer timer = TeensyTimerTool::PeriodicTimer(TeensyTimerTool::TCK);
 
         bool doubleDriver = false;
 
@@ -75,8 +84,8 @@ class StepDriver
                 return;
             }
             // Convert frequency to period in microseconds
-            float periodMicros = 1e6 / frequency / 2; // half period (toggle HIGH/LOW)
-
+            double periodMicros = 1e6 / frequency / 2; // half period (toggle HIGH/LOW)
+            // SerialUSB.println(periodMicros);
             /*
             digitalWriteFast can change a pin's state far faster, 
             at the expense of not doing some safety checking/perfect cross-platform compatibility.

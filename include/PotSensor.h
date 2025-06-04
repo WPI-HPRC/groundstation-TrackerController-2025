@@ -34,19 +34,54 @@ class PotSensor : public Sensor
 
         void debugPrint(Stream *printInterface)
         {
-            printInterface->print("Current Position: "); printInterface->print(getDistFrom0()); printInterface->print(", ");
+            printInterface->print("Current Position: "); printInterface->print(getDistFrom0()); printInterface->print(", "); 
+            printInterface->print("Current Velocity: "); printInterface->print(currentVel, 20); printInterface->print(", "); 
             printInterface->print("Pot reading: "); printInterface->print(currentPos); printInterface->println();
         }
 
-        // returns 0 in all cases
+        void updateVelocity() override
+        {
+            // update velocity
+                // convert to actual degrees
+            float currentRealPos = ( (currentPos - zeroPos ) * conversionConstant );
+            float lastRealPos = ( (lastPos - zeroPos ) * conversionConstant );
+
+            // time math
+            unsigned long dt = micros() - lastTime;
+            lastTime = micros();
+
+            // SerialUSB.println(dt);
+
+            // velocity math
+            currentVel = ( (currentRealPos - lastRealPos) / dt ) * (10e4);
+            lastPos = currentPos;
+        };
+
+        // returns 0 if updated
+        // returns 1 if didn't update a noisy reading
         uint8_t update() override
         {
-            currentPos = analogRead(analogPin);
+            float newReading = analogRead(analogPin);
+
+            // SerialUSB.println(abs(newReading-currentPos));
+            if(abs(newReading-currentPos) < 3){
+                return 1;
+            }
+            currentPos = newReading;
+            
+            
+            // currentPos = analogRead(analogPin);
+
+            // updateVelocity();
+
             return 0;
         }
 
-        float getDistFrom0()
+        float getDistFrom0() override
             { return (currentPos - zeroPos) * conversionConstant; }; // sensors should use their raw value internally, and we only convert to the desired unit with the conversion constant before we give it to the user
+
+        float getVelocity() override
+            { return currentVel; };
 
     private:
         uint8_t analogPin;

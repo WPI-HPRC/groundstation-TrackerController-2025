@@ -1,18 +1,17 @@
 #include <Arduino.h>
 
-// CHOOSE DEPLOY PLATFORM HERE ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#define REAL
-// #define SUBSCALE
-// #define SIM // NOTE: this will be implemented in the future at some point. whether it will be HITL is TBD
+// CHOOSE DEPLOY PLATFORM BY SELECTING ENVIRONMENT IN PLATFORMIO
 
 ////////////////////////////////////////////////////////////////////// Includes //////////////////////////////////////////////////////////////////////
  
 // platform specific defines
 #ifdef REAL
   #include "Constants/ConstantsReal.h"
-#elif SUBSCALE
+#endif
+#ifdef SUBSCALE
   #include "Constants/ConstantsSubscale.h"
-#elif SIM
+#endif
+#ifdef SIM
   #include "Constants/ConstantsSim.h"
 #endif // platform specific defines
 
@@ -30,7 +29,7 @@
 #include "IMU.h"
 
 // this handles our interfacing to the outside world
-// #include "StreamInterface.h"
+#include "StreamInterface.h"
 
 // temporary serial interface code for tuning / bringup
 #include "TunerInterface.h"
@@ -54,11 +53,16 @@ AxisController elevationController(&elevationMotorDriver, elevationEnable, eleva
 // IMU abstraction object over both chips for accel, gyro & mag
 IMU imu;
 
+// serial interface
+// StreamInterface serialInterface(&SerialUSB);
+
 // tuning interface
 TunerInterface tuner(&SerialUSB);
 
-TeensyTimerTool::PeriodicTimer debugPrintTimer;
-TeensyTimerTool::PeriodicTimer blinkTimer;
+TeensyTimerTool::PeriodicTimer debugPrintTimer(TeensyTimerTool::TCK);
+TeensyTimerTool::PeriodicTimer blinkTimer(TeensyTimerTool::TCK);
+TeensyTimerTool::PeriodicTimer sensorVelocityTimer(TeensyTimerTool::TCK);
+
 
 ////////////////////////////////////////////////////////////////////// Local Function Declarations //////////////////////////////////////////////////////////////////////
 
@@ -80,9 +84,11 @@ void setup()
 
   configureHardware(); // setup pins and tuning parameters for controllers
 
-  debugPrintTimer.begin(debugPrint, 100000); // 100000 in µs = 100ms = 0.1s
+  debugPrintTimer.begin(debugPrint, 100ms); // thank you std::chrono for readable units
 
-  blinkTimer.begin([]{digitalToggle(LED_POLARIS);}, 1000000); // 1000000 in us = 1s blink
+  blinkTimer.begin([]{digitalToggle(LED_POLARIS);}, 1s); // thank you std::chrono for readable units
+
+  sensorVelocityTimer.begin([]{azimuthSensor->updateVelocity();elevationSensor->updateVelocity();}, 100ms); // thank you std::chrono for readable units
 
   // start actual things
   azimuthController.begin();  
@@ -94,27 +100,37 @@ void setup()
   digitalWrite(LED_BUILTIN, LOW);
   digitalWrite(LED_POLARIS, LOW);
 
+  // azimuthMotorDriver.begin();
+  // elevationMotorDriver.begin();
+  // elevationSensor->begin();
+
   // imu.begin();
 
   // actual begin code
   delay(10);
-  // azimuthMotorDriver.setVelocityCommand(-1);
-  // elevationMotorDriver.setVelocityCommand(2);
-  // azimuthController.homeController();
+  // pinMode(azimuthEnable, OUTPUT); digitalWrite(azimuthEnable, LOW);
+  // pinMode(elevationEnable, OUTPUT); digitalWrite(elevationEnable, LOW);
+  // azimuthMotorDriver.setVelocityCommand(5);
+  // elevationMotorDriver.setVelocityCommand(-100);
+  
+  azimuthController.homeController();
   // elevationController.homeController();
+
+
+  delay(10);
+
+  // elevationController.setTarget(45);
+  elevationController.setTarget(180);
+
 }
 
 ////////////////////////////////////////////////////////////////////// loop() //////////////////////////////////////////////////////////////////////
 
-// select controller for tuning
-AxisController tuningController = azimuthController;
-Sensor* tuningSensor = azimuthSensor;
-// AxisController tuningController = elevationController;
-// Sensor* tuningSensor = elevationSensor;
-
 // as everything is run through timers, loop goes unused
 void loop() 
 {
+  // this is called implicitly
+  // yield(); 
 }
 
 
@@ -123,10 +139,9 @@ void loop()
 void debugPrint()
 {
   // azimuthController.debugPrint(&SerialUSB);
-  // elevationController.debugPrint(&SerialUSB);
+  elevationController.debugPrint(&SerialUSB);
   // azimuthSensor->debugPrint(&SerialUSB);
-  elevationSensor->update();
-  elevationSensor->debugPrint(&SerialUSB);
+  // elevationSensor->debugPrint(&SerialUSB);
 }
 
 
@@ -136,11 +151,11 @@ void configureHardware()
   azimuthSensor->setSensorPins(azimuthEncoderA, azimuthEncoderB, azimuthLimitSwitch);
   azimuthSensor->setPhysicalConversionConstant(azimuthConversionRatio);
   azimuthMotorDriver.setPins(azimuthDirection, azimuthStep);
-  azimuthMotorDriver.setPhysicalConstants(DegreesPerStep, microStepResolution);
+  azimuthMotorDriver.setPhysicalConstants(DegreesPerStepAzimuth, microStepResolution);
 
   // configure azimuth motion controller
-  azimuthController.setPhysicalLimits(azimuthMaxVelocity, azimuthMaxAcceleration, azimuthMaxJerk);
-  azimuthController.setTuningParameters(azimuthFF, azimuthkP, azimuthkD, 0.0, azimuthAcceptableError, azimuthAcceptableVelocityError);
+  azimuthController.setPhysicalLimits(azimuthMaxVelocity, azimuthMaxAcceleration, azimuthGearRatio);
+  azimuthController.setTuningParameters(azimuthFF, azimuthkP, azimuthkI, azimuthkD, 0.0, azimuthAcceptableError, azimuthAcceptableVelocityError, homingVelocity);
   azimuthController.setLoopTimeStep(controlLoopTimeStep);
 
   // configure elevation hardware
@@ -148,70 +163,11 @@ void configureHardware()
   elevationSensor->setPhysicalConversionConstant(elevationConversionRatio);
   elevationSensor->setZero(elevationMinimumValue); // we only do this for the elevation, azimuth zeroes itself
   elevationMotorDriver.setPins(elevationDirection, elevationStep, elevationDirection2, elevationStep2);
-  elevationMotorDriver.setPhysicalConstants(DegreesPerStep, microStepResolution);
+  elevationMotorDriver.setPhysicalConstants(DegreesPerStepElevation, microStepResolution);
 
   // configure elevation motion controller
-  elevationController.setPhysicalLimits(elevationMaxVelocity, elevationMaxAcceleration, elevationMaxJerk);
-  elevationController.setTuningParameters(elevationFF, elevationkP, elevationkD, elevationGravityCompFactor, elevationAcceptableError, elevationAcceptableVelocityError);
+  elevationController.setPhysicalLimits(elevationMaxVelocity, elevationMaxAcceleration, elevationGearRatio);
+  elevationController.setTuningParameters(elevationFF, elevationkP, elevationkI, elevationkD, elevationGravityCompFactor, elevationAcceptableError, elevationAcceptableVelocityError, homingVelocity);
   elevationController.setLoopTimeStep(controlLoopTimeStep);
 
-}
-
-
-float actualVel;
-float actualAcc;
-void runTuner()
-{
-  // check for tuner updates
-  tuner.readSerial();
-  if(tuner.newData()){
-    while(!tuningController.smoothStopController()){};
-    tuningController.setPhysicalLimits(tuner.getMaxVel(), tuner.getMaxAccel(), tuner.getMaxJerk());
-    // tuningController.setTuningParameters(tuner.getKP(), tuner.getKD(), tuner.getGravFF(), tuner.getAcceptableError(), tuner.getAcceptableVelocityError());
-    tuningController.setHoldBehavior(tuner.getBrake() ? HoldBehavior::brakeMode : HoldBehavior::coastMode);
-    // now that we've applied our new stuff, we can re-enable the controller
-    tuningController.startController();
-    // now give it a target
-    tuningController.setTarget(tuner.getTarget());
-  }
-
-
-  // send data to tuner
-  // calculateVelAccel(tuningSensor->getDistFrom0());
-  sendTunerData(tuningController.motionProfiler.getDesiredPosition(), tuningSensor->getDistFrom0(),
-                tuningController.motionProfiler.getDesiredVelocity(), actualVel,
-                tuningController.motionProfiler.getDesiredAcceleration(), actualAcc);
-}
-
-float prevPos;
-float prevVel;
-unsigned long prevTime = 0;
-void calculateVelAccel(float actualPos)
-{
-  unsigned long currentTime = millis();
-  float dt = (currentTime - prevTime) / 1000.0;  // Time difference in seconds
-
-  // Update actual velocity and acceleration
-  actualVel = (actualPos - prevPos) / dt;  // Velocity = (position change) / (time change)
-  actualAcc = (actualVel - prevVel) / dt;  // Acceleration = (velocity change) / (time change)
-
-  // Update previous values for next calculation
-  prevTime = currentTime;
-  prevPos = actualPos;
-  prevVel = actualVel;
-}
-
-void sendTunerData(float desiredPos, float actualPos, float desiredVel, float actualVelocity, float desiredAcc, float actualAccel)
-{
-  // Create a formatted string with all the data
-  String message = "MOTION_DATA,";
-  message += String(desiredPos, 4) + ",";
-  message += String(actualPos, 4) + ",";
-  message += String(desiredVel, 4) + ",";
-  message += String(actualVelocity, 4) + ",";
-  message += String(desiredAcc, 4) + ",";
-  message += String(actualAccel, 4);
-
-  // Send the message over serial
-  Serial.println(message);
 }
