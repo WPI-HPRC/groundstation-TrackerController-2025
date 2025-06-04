@@ -217,11 +217,12 @@ class AxisController
         // it will act similar to the brakeMode hold behavior, but will actively maintain position.
         void startController()
         {
-            state = State::stopped; // change to an an enabled mode
+            state = State::running; // change to an an enabled mode
         };
 
         void homeController()
         {
+            sensor->unsetZero();
             state = State::homing;
         }
 

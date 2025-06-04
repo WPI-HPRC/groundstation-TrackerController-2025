@@ -32,7 +32,7 @@
 #include "StreamInterface.h"
 
 // temporary serial interface code for tuning / bringup
-#include "TunerInterface.h"
+// #include "TunerInterface.h"
 
 ////////////////////////////////////////////////////////////////////// Global Objects //////////////////////////////////////////////////////////////////////
 
@@ -54,10 +54,10 @@ AxisController elevationController(&elevationMotorDriver, elevationEnable, eleva
 IMU imu;
 
 // serial interface
-// StreamInterface serialInterface(&SerialUSB);
+StreamInterface serialInterface(&SerialUSB);
 
 // tuning interface
-TunerInterface tuner(&SerialUSB);
+// TunerInterface tuner(&SerialUSB);
 
 TeensyTimerTool::PeriodicTimer debugPrintTimer(TeensyTimerTool::TCK);
 TeensyTimerTool::PeriodicTimer blinkTimer(TeensyTimerTool::TCK);
@@ -66,7 +66,10 @@ TeensyTimerTool::PeriodicTimer sensorVelocityTimer(TeensyTimerTool::TCK);
 
 ////////////////////////////////////////////////////////////////////// Local Function Declarations //////////////////////////////////////////////////////////////////////
 
+void interfaceLoop();
+
 void debugPrint();
+void interface();
 
 void configureHardware(); // provides pin mappings and tuning parameters to objects
 
@@ -79,12 +82,13 @@ void sendTunerData(float desiredPos, float actualPos, float desiredVel, float ac
 
 void setup() 
 {
-  SerialUSB.begin(115200);
+  SerialUSB.begin(9600);
   while(!SerialUSB){} // wait for connection
 
   configureHardware(); // setup pins and tuning parameters for controllers
 
   debugPrintTimer.begin(debugPrint, 100ms); // thank you std::chrono for readable units
+  interfaceTimer.begin(interfaceLoop, 100000); // 100000 in µs = 100ms = 0.1s
 
   blinkTimer.begin([]{digitalToggle(LED_POLARIS);}, 1s); // thank you std::chrono for readable units
 
@@ -113,14 +117,14 @@ void setup()
   // azimuthMotorDriver.setVelocityCommand(5);
   // elevationMotorDriver.setVelocityCommand(-100);
   
-  azimuthController.homeController();
+  // azimuthController.homeController();
   // elevationController.homeController();
 
 
   delay(10);
 
   // elevationController.setTarget(45);
-  elevationController.setTarget(180);
+  // elevationController.setTarget(180);
 
 }
 
@@ -133,15 +137,23 @@ void loop()
   // yield(); 
 }
 
-
 ////////////////////////////////////////////////////////////////////// Local Function Definitions //////////////////////////////////////////////////////////////////////
 
-void debugPrint()
+void interfaceLoop()
 {
+  // debugPrint();
+  interface();
+}
+
+void debugPrint(){
   // azimuthController.debugPrint(&SerialUSB);
-  elevationController.debugPrint(&SerialUSB);
+  // elevationController.debugPrint(&SerialUSB);
   // azimuthSensor->debugPrint(&SerialUSB);
   // elevationSensor->debugPrint(&SerialUSB);
+}
+
+void interface(){
+  serialInterface.read();
 }
 
 
@@ -169,5 +181,4 @@ void configureHardware()
   elevationController.setPhysicalLimits(elevationMaxVelocity, elevationMaxAcceleration, elevationGearRatio);
   elevationController.setTuningParameters(elevationFF, elevationkP, elevationkI, elevationkD, elevationGravityCompFactor, elevationAcceptableError, elevationAcceptableVelocityError, homingVelocity);
   elevationController.setLoopTimeStep(controlLoopTimeStep);
-
 }
