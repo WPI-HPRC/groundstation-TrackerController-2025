@@ -59,6 +59,7 @@ StreamInterface serialInterface(&SerialUSB);
 // tuning interface
 // TunerInterface tuner(&SerialUSB);
 
+TeensyTimerTool::PeriodicTimer interfaceTimer(TeensyTimerTool::TCK);
 TeensyTimerTool::PeriodicTimer debugPrintTimer(TeensyTimerTool::TCK);
 TeensyTimerTool::PeriodicTimer blinkTimer(TeensyTimerTool::TCK);
 TeensyTimerTool::PeriodicTimer sensorVelocityTimer(TeensyTimerTool::TCK);
@@ -88,7 +89,7 @@ void setup()
   configureHardware(); // setup pins and tuning parameters for controllers
 
   debugPrintTimer.begin(debugPrint, 100ms); // thank you std::chrono for readable units
-  interfaceTimer.begin(interfaceLoop, 100000); // 100000 in µs = 100ms = 0.1s
+  interfaceTimer.begin(interfaceLoop, 10ms); // 100000 in µs = 100ms = 0.1s
 
   blinkTimer.begin([]{digitalToggle(LED_POLARIS);}, 1s); // thank you std::chrono for readable units
 
