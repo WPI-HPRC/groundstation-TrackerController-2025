@@ -128,6 +128,7 @@ class AxisController
 
         void homeController()
         {
+            sensor->unsetZero();
             state = State::homing;
         }
 

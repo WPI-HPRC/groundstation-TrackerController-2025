@@ -15,6 +15,9 @@ class Sensor
         void setZero(int64_t ZeroPos)
             {zeroPos = ZeroPos; zeroed = true; };
 
+        void unsetZero()
+            { zeroed = false; }
+
         virtual uint8_t begin();
         virtual uint8_t update();
 

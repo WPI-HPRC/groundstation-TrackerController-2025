@@ -23,25 +23,14 @@ class StreamInterface
             while (streamInterface->peek() != -1) 
             {
                 size_t bytesRead = streamInterface->readBytes(&readBuffer[readBufferIndex], READ_BUFFER_LENGTH - readBufferIndex);
-
-                Serial.printf("Read %d bytes\n\t", bytesRead);
-                String str = "";
-
-                for (size_t i = 0; i < bytesRead; i++)
-                {
-                    // str += readBuffer[readBufferIndex + i];
-                    // str.append(readBuffer[readBufferIndex + i]);
-                    Serial.printf("%c", readBuffer[readBufferIndex + i]);
-                }
-
-                // Serial.printf("%c", streamInterface->read());
-                Serial.print("\n\n");
-
-
                 if(bytesRead == 0)
                 {
                     break;
                 }
+
+                handleMessage(readBuffer);
+                /*
+   
                 if(readBuffer[readBufferIndex+bytesRead == 'E'])
                 {
                     // Now we know a packet has been read completely, so handle it here
@@ -53,7 +42,9 @@ class StreamInterface
                 {
                     readBufferIndex += bytesRead;
                 }
+                */
             }
+            handleGetter_pose();
         };
         
 
@@ -88,7 +79,6 @@ private: // functions
                 azimuthController->setTarget(azimuth_degrees);
                 elevationController->setTarget(elevation_degrees);
                 azimuthController->startController();
-                azimuthController->debugPrint(streamInterface);
             }
             
             String response = "R;P;E";
@@ -156,6 +146,12 @@ private: // functions
             streamInterface->write("D;C;E");
         }
 
+        void handleSetter_home()
+        {
+            azimuthController->homeController();
+            streamInterface->write("D;H;E");
+        }
+
         void handleSetter(const char *buffer)
         {
             char setterType = buffer[0];
@@ -165,6 +161,13 @@ private: // functions
                 {
                     // Skip the semicolon in the message
                     handleSetter_pose(&buffer[2]);
+                    break;
+                }
+                
+                case 'H':
+                {
+                    Serial.print("Homing");
+                    handleSetter_home();
                     break;
                 }
                 default:
@@ -226,7 +229,7 @@ private: // functions
                 }
                 case 'G': // Getter
                 {
-                    handleSetter(&buffer[2]);
+                    handleGetter(&buffer[2]);
                     break;
                 }
                 default:
