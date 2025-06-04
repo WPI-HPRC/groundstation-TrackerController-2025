@@ -54,7 +54,7 @@ AxisController elevationController(&elevationMotorDriver, elevationEnable, eleva
 IMU imu;
 
 // serial interface
-StreamInterface serialInterface(&SerialUSB);
+StreamInterface serialInterface(&SerialUSB, azimuthSensor, elevationSensor, &azimuthController, &elevationController, &imu);
 
 // tuning interface
 // TunerInterface tuner(&SerialUSB);
