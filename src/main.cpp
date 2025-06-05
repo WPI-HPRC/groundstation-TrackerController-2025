@@ -105,28 +105,20 @@ void setup()
   digitalWrite(LED_BUILTIN, LOW);
   digitalWrite(LED_POLARIS, LOW);
 
-  // azimuthMotorDriver.begin();
-  // elevationMotorDriver.begin();
-  // elevationSensor->begin();
-
-  // imu.begin();
+  imu.begin();
 
   // actual begin code
   delay(10);
+
+
   // pinMode(azimuthEnable, OUTPUT); digitalWrite(azimuthEnable, LOW);
   // pinMode(elevationEnable, OUTPUT); digitalWrite(elevationEnable, LOW);
+  
   // azimuthMotorDriver.setVelocityCommand(5);
   // elevationMotorDriver.setVelocityCommand(-100);
   
   // azimuthController.homeController();
   // elevationController.homeController();
-
-
-  delay(10);
-
-  // elevationController.setTarget(45);
-  // elevationController.setTarget(180);
-
 }
 
 ////////////////////////////////////////////////////////////////////// loop() //////////////////////////////////////////////////////////////////////
