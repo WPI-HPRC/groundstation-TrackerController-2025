@@ -42,7 +42,7 @@ class EncoderSensor : public Sensor
 
                     if(storedSwitchState == LOW)
                     {
-                        Sensor::setZero(encoder.read());
+                        Sensor::setZero(encoder.read()-zeroOffset);
                         return 1;
                     }
                 }

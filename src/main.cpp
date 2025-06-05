@@ -163,6 +163,7 @@ void configureHardware()
   // configure azimuth hardware
   azimuthSensor->setSensorPins(azimuthEncoderA, azimuthEncoderB, azimuthLimitSwitch);
   azimuthSensor->setPhysicalConversionConstant(azimuthConversionRatio);
+  azimuthSensor->setZeroOffset(azimuthZeroOffsetDegrees);
   azimuthMotorDriver.setPins(azimuthDirection, azimuthStep);
   azimuthMotorDriver.setPhysicalConstants(DegreesPerStepAzimuth, microStepResolution);
 

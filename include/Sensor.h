@@ -15,6 +15,11 @@ class Sensor
         void setZero(int64_t ZeroPos)
             {zeroPos = ZeroPos; zeroed = true; };
 
+        void setZeroOffset(float offsetDegrees)
+        {
+            zeroOffset = offsetDegrees / conversionConstant;
+        }
+
         void unsetZero()
             { zeroed = false; }
 
@@ -52,6 +57,8 @@ class Sensor
         int64_t currentPos; // use integers internally to prevent any floating point weirdness
         int64_t lastPos;
         int64_t zeroPos = 0;
+
+        int64_t zeroOffset;
 
         float currentVel;
 
