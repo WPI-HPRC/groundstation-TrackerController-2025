@@ -24,7 +24,7 @@ constexpr float elevationMaxAcceleration  = 100.0; // degrees per second^2
 constexpr float elevationAcceptableError = 2.5; // degrees
 constexpr float elevationAcceptableVelocityError = 0.5; // degrees per second
 
-constexpr float elevationFF   = 10.0; // technically units of velocity
+constexpr float elevationFF   = 50.0; // technically units of velocity
 constexpr float elevationkP   = 1.0; // unitless
 constexpr float elevationkI   = 0.5; // unitless
 constexpr float elevationkD   = 1.0; // unitless
@@ -39,6 +39,8 @@ constexpr float azimuthMotorPinionTeeth = 20; // gear teeth
 constexpr float azimuthEncoderPinionTeeth = 20; // gear teeth
 
 constexpr float azimuthGearRatio = (azimuthMainGearTeeth/azimuthMotorPinionTeeth);
+
+constexpr float azimuthZeroOffsetDegrees = -135.0; // degrees around main azimuth axis
 
 constexpr float elevationMainGearTeeth = 96; // ratio
 constexpr float elevationMotorPinion = 12; // ratio
@@ -73,19 +75,19 @@ constexpr double azimuthConversionRatio ( (360.0/azimuthEncoderTicksPerRev) / az
 
 #define LED_POLARIS 13
 
-constexpr uint8_t azimuthEncoderA = 15;
-constexpr uint8_t azimuthEncoderB = 16;
+constexpr uint8_t azimuthEncoderA = 6;
+constexpr uint8_t azimuthEncoderB = 7;
 
-constexpr uint8_t azimuthLimitSwitch = 0;
+constexpr uint8_t azimuthLimitSwitch = 5;
 
-constexpr uint8_t azimuthStep = 30;
-constexpr uint8_t azimuthDirection = 14;
-constexpr uint8_t azimuthEnable = 39;
+constexpr uint8_t azimuthStep = 2;
+constexpr uint8_t azimuthDirection = 3;
+constexpr uint8_t azimuthEnable = 4;
 
-constexpr uint8_t elevationPotentiometer = 32;
+constexpr uint8_t elevationPotentiometer = 21;
 
-constexpr uint8_t elevationStep = 35;
-constexpr uint8_t elevationDirection = 38;
-constexpr uint8_t elevationEnable = 36;
+constexpr uint8_t elevationStep = 14;
+constexpr uint8_t elevationDirection = 15;
+constexpr uint8_t elevationEnable = 18;
 constexpr uint8_t elevationStep2 = -1;
 constexpr uint8_t elevationDirection2 = -1;

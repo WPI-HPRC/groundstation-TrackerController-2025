@@ -105,11 +105,15 @@ void setup()
   digitalWrite(LED_BUILTIN, LOW);
   digitalWrite(LED_POLARIS, LOW);
 
+#ifdef REAL // subscale doesn't have an IMU
   imu.begin();
+#endif
 
   // actual begin code
   delay(10);
 
+  // elevationMotorDriver.begin();
+  // elevationSensor->begin();
 
   // pinMode(azimuthEnable, OUTPUT); digitalWrite(azimuthEnable, LOW);
   // pinMode(elevationEnable, OUTPUT); digitalWrite(elevationEnable, LOW);
@@ -119,6 +123,8 @@ void setup()
   
   // azimuthController.homeController();
   // elevationController.homeController();
+
+  // elevationController.setTarget(50);
 }
 
 ////////////////////////////////////////////////////////////////////// loop() //////////////////////////////////////////////////////////////////////
@@ -134,7 +140,6 @@ void loop()
 
 void interfaceLoop()
 {
-  // debugPrint();
   interface();
 }
 
@@ -142,6 +147,7 @@ void debugPrint(){
   // azimuthController.debugPrint(&SerialUSB);
   // elevationController.debugPrint(&SerialUSB);
   // azimuthSensor->debugPrint(&SerialUSB);
+  // elevationSensor->update();
   // elevationSensor->debugPrint(&SerialUSB);
 }
 

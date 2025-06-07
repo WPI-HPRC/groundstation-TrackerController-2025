@@ -155,7 +155,7 @@ class AxisController
                         accelLimitApplied = false;
                     }
 
-                    if(!velocityLimitApplied && !accelLimitApplied){
+                    if(!velocityLimitApplied && !accelLimitApplied && !reachedGoal){
                         // if the motor output isn't being saturated, then integrate the error
                         integralError = tempIntegralError;
                     }
