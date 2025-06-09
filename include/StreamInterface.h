@@ -61,7 +61,6 @@ private: // variables
 
 private: // functions
 
-
         void handleSetter_pose(const char *buffer)
         {
             int buffer_index = bytesUntilSemicolon(buffer);

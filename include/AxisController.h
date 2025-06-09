@@ -38,6 +38,12 @@ class AxisController
             // controlLoopTimer.setNextPeriod(timeStep); // why do we have to do it twice?? idk, library quirk
         };
 
+        void setLimits(float MinimumAngle, float MaximumAngle)
+        {
+            minimumAngle = MinimumAngle;
+            maximumAngle = MaximumAngle;
+        };
+
         void updateLoop()
         {
             sensor->update(); // run an update loop for our sensor so we chilling on position
@@ -72,7 +78,6 @@ class AxisController
                     // so as long as we reach the goal of ~0 velocity we're fine
                     reachedGoal = reachedVelGoal;
                     if (reachedVelGoal){ state = State::disabled; };
-                    
                     
                     [[fallthrough]]; // we intentionally fall through here to continue to run the motion profiler while stopping
 
@@ -260,6 +265,7 @@ class AxisController
 
         void setTarget(float target)
         {
+            target = constrain(target, minimumAngle, maximumAngle);
             goalPosition = target;
             motionProfiler.setTarget(goalPosition, sensor->getDistFrom0(), sensor->getVelocity());
             state = State::running;
@@ -327,6 +333,9 @@ class AxisController
 
         float velocityCommand;
         float prevVelocityCommand;
+
+        float minimumAngle = __FLT_MIN__;
+        float maximumAngle = __FLT_MAX__;
 
         // gravity feedfoward
         float getGravityFF()

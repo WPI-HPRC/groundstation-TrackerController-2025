@@ -181,4 +181,5 @@ void configureHardware()
   elevationController.setPhysicalLimits(elevationMaxVelocity, elevationMaxAcceleration, elevationGearRatio);
   elevationController.setTuningParameters(elevationFF, elevationkP, elevationkI, elevationkD, elevationGravityCompFactor, elevationAcceptableError, elevationAcceptableVelocityError, homingVelocity);
   elevationController.setLoopTimeStep(controlLoopTimeStep);
+  elevationController.setLimits(elevationMinimumAngle, elevationMaximumAngle);
 }
