@@ -121,17 +121,17 @@ void setup()
   // azimuthMotorDriver.setVelocityCommand(5);
   // elevationMotorDriver.setVelocityCommand(-100);
   
-  // azimuthController.homeController();
+  azimuthController.homeController();
   // elevationController.homeController();
 
-  // while(!azimuthSensor->isZeroed()){delay(1);};
+  while(!azimuthSensor->isZeroed()){delay(1);};
 
   // elevationController.setTarget(30);
   // elevationController.setTarget(90);
-  elevationController.setTarget(60);
+  // elevationController.setTarget(60);
 
   // azimuthController.setTarget(40);
-  // azimuthController.setTarget(90);
+  azimuthController.setTarget(90);
   // azimuthController.setTarget(10);
 }
 
@@ -153,8 +153,8 @@ void interfaceLoop()
 }
 
 void debugPrint(){
-  // azimuthController.debugPrint(&SerialUSB);
-  elevationController.debugPrint(&SerialUSB);
+  azimuthController.debugPrint(&SerialUSB);
+  // elevationController.debugPrint(&SerialUSB);
   // azimuthSensor->debugPrint(&SerialUSB);
   // elevationSensor->update();
   // elevationSensor->debugPrint(&SerialUSB);

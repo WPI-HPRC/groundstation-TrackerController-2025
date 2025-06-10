@@ -6,15 +6,15 @@
 ////////////////////////////////////////////////////////////////////// Tuning Parameters //////////////////////////////////////////////////////////////////////
 
 constexpr float azimuthMaxVelocity      = 10.0; // degrees per second
-constexpr float azimuthMaxAcceleration  = 10.0; // degrees per second^2
+constexpr float azimuthMaxAcceleration  = 1.0; // degrees per second^2
 
 constexpr float azimuthAcceptableError = 5.0; // degrees
 constexpr float azimuthAcceptableVelocityError = 5.0; // degrees per second
 
-constexpr float azimuthFF   = 1.0; // technically units of velocity
-constexpr float azimuthkP   = 0.0; // unitless
-constexpr float azimuthkI   = 0.0; // unitless
-constexpr float azimuthkD   = 0.0; // unitless
+constexpr float azimuthFF   = 0.05; // technically units of velocity
+constexpr float azimuthkP   = 0.2; // unitless
+constexpr float azimuthkI   = 0.25; // unitless
+constexpr float azimuthkD   = 0.1; // unitless
 
 constexpr float homingVelocity = 0.5; // degrees per second
 
