@@ -129,6 +129,10 @@ void setup()
   // elevationController.setTarget(30);
   // elevationController.setTarget(90);
   elevationController.setTarget(60);
+
+  // azimuthController.setTarget(40);
+  // azimuthController.setTarget(90);
+  // azimuthController.setTarget(10);
 }
 
 ////////////////////////////////////////////////////////////////////// loop() //////////////////////////////////////////////////////////////////////
