@@ -153,7 +153,7 @@ void interfaceLoop()
 }
 
 void debugPrint(){
-  azimuthController.debugPrint(&SerialUSB);
+  // azimuthController.debugPrint(&SerialUSB);
   // elevationController.debugPrint(&SerialUSB);
   // azimuthSensor->debugPrint(&SerialUSB);
   // elevationSensor->update();
