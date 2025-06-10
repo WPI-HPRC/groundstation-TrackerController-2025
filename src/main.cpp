@@ -124,7 +124,11 @@ void setup()
   // azimuthController.homeController();
   // elevationController.homeController();
 
-  // elevationController.setTarget(50);
+  // while(!azimuthSensor->isZeroed()){delay(1);};
+
+  // elevationController.setTarget(30);
+  // elevationController.setTarget(90);
+  elevationController.setTarget(60);
 }
 
 ////////////////////////////////////////////////////////////////////// loop() //////////////////////////////////////////////////////////////////////
@@ -140,12 +144,13 @@ void loop()
 
 void interfaceLoop()
 {
-  interface();
+  // interface();
+  debugPrint();
 }
 
 void debugPrint(){
   // azimuthController.debugPrint(&SerialUSB);
-  // elevationController.debugPrint(&SerialUSB);
+  elevationController.debugPrint(&SerialUSB);
   // azimuthSensor->debugPrint(&SerialUSB);
   // elevationSensor->update();
   // elevationSensor->debugPrint(&SerialUSB);

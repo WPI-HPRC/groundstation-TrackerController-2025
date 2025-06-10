@@ -8,10 +8,10 @@
 constexpr float azimuthMaxVelocity      = 10.0; // degrees per second
 constexpr float azimuthMaxAcceleration  = 10.0; // degrees per second^2
 
-constexpr float azimuthAcceptableError = 0.0; // degrees
-constexpr float azimuthAcceptableVelocityError = 0.0; // degrees per second
+constexpr float azimuthAcceptableError = 5.0; // degrees
+constexpr float azimuthAcceptableVelocityError = 5.0; // degrees per second
 
-constexpr float azimuthFF   = 0.0; // technically units of velocity
+constexpr float azimuthFF   = 1.0; // technically units of velocity
 constexpr float azimuthkP   = 0.0; // unitless
 constexpr float azimuthkI   = 0.0; // unitless
 constexpr float azimuthkD   = 0.0; // unitless
@@ -19,17 +19,17 @@ constexpr float azimuthkD   = 0.0; // unitless
 constexpr float homingVelocity = 0.5; // degrees per second
 
 
-constexpr float elevationMaxVelocity      = 10.0; // degrees per second
-constexpr float elevationMaxAcceleration  = 10.0; // degrees per second^2
+constexpr float elevationMaxVelocity      = 15.0; // degrees per second
+constexpr float elevationMaxAcceleration  = 135.0; // degrees per second^2
 
-constexpr float elevationAcceptableError = 0.0; // degrees
-constexpr float elevationAcceptableVelocityError = 0.0; // degrees per second
+constexpr float elevationAcceptableError = 5.0; // degrees
+constexpr float elevationAcceptableVelocityError = 10.0; // degrees per second
 
-constexpr float elevationFF   = 0.0; // technically units of velocity
-constexpr float elevationkP   = 0.0; // unitless
-constexpr float elevationkI   = 0.0; // unitless
-constexpr float elevationkD   = 0.0; // unitless
-constexpr float elevationGravityCompFactor = 0.0; // technically not unitless, but determined emperically, not by calculation
+constexpr float elevationFF   = 0.4; // technically units of velocity
+constexpr float elevationkP   = 0.2; // unitless
+constexpr float elevationkI   = 0.09; // unitless
+constexpr float elevationkD   = 0.05; // unitless
+constexpr float elevationGravityCompFactor = 0.1; // technically not unitless, but determined emperically, not by calculation
 
 constexpr float controlLoopTimeStep = 10000; // microseconds - 10000us = 10ms = 100Hz control loop update rate
 
@@ -41,7 +41,8 @@ constexpr float azimuthEncoderPinionTeeth = 40; // gear teeth
 
 constexpr float azimuthGearRatio = (azimuthMainGearTeeth/azimuthMotorPinionTeeth);
 
-constexpr float azimuthZeroOffsetDegrees = 44.011; // degrees around main azimuth axis
+// constexpr float azimuthZeroOffsetDegrees = 44.011; // degrees around main azimuth axis
+constexpr float azimuthZeroOffsetDegrees = 0.0;
 
 constexpr float elevationGearboxReduction = 20; // ratio
 constexpr float elevationChainReduction = 3; // ratio
@@ -58,8 +59,8 @@ constexpr float DegreesPerStepElevation = 1.8f;
 ////////////////////////////////////////////////////////////////////// Sensor Calibration Values //////////////////////////////////////////////////////////////////////
 
 // must be determined emperically 
-constexpr uint16_t elevationMinimumValue = 1; // Old value- 110; // ADC reading value
-constexpr uint16_t elevationMaximumValue = 621; // Old value- 826; // ADC reading value
+constexpr uint16_t elevationMinimumValue = 249; // ADC reading value
+constexpr uint16_t elevationMaximumValue = 829; // ADC reading value
 
 // must be determined/defined
 constexpr float elevationMinimumAngle = 0.0f; // degrees

@@ -186,7 +186,8 @@ class AxisController
                 // make sure that the controller can actually output
                 applyHoldBehavior(HoldBehavior::brakeMode);
                 // apply our desired value
-                driver->setVelocityCommand(velocityCommand);
+                float newVelocityCommand = constrain(velocityCommand, -maxVelocityLimit*gearRatio, maxVelocityLimit*gearRatio);
+                driver->setVelocityCommand(newVelocityCommand);
             }
 
             // we only want to apply our hold behavior when we are disabled
