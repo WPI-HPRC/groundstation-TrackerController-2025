@@ -75,7 +75,7 @@ private: // functions
 
             // we only want to apply the value if the axes are zeroed.
             if((azimuthSensor->isZeroed() && elevationSensor->isZeroed()) || true){
-                azimuthController->setTarget(azimuth_degrees);
+                azimuthController->setTarget(-azimuth_degrees);
                 elevationController->setTarget(elevation_degrees);
                 azimuthController->startController();
             }
