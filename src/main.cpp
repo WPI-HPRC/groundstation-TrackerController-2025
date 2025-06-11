@@ -86,6 +86,8 @@ void setup()
   SerialUSB.begin(9600);
   while(!SerialUSB){} // wait for connection
 
+  SerialUSB.setTimeout(5);
+
   configureHardware(); // setup pins and tuning parameters for controllers
 
   debugPrintTimer.begin(debugPrint, 100ms); // thank you std::chrono for readable units
@@ -153,7 +155,7 @@ void interfaceLoop()
 }
 
 void debugPrint(){
-  // azimuthController.debugPrint(&SerialUSB);
+  azimuthController.debugPrint(&SerialUSB);
   // elevationController.debugPrint(&SerialUSB);
   // azimuthSensor->debugPrint(&SerialUSB);
   // elevationSensor->update();

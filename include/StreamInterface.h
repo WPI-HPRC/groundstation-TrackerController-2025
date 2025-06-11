@@ -19,31 +19,44 @@ class StreamInterface
 
         void read()
         {
-            // Read bytes until there aren't any more to be read
-            while (streamInterface->peek() != -1) 
-            {
+            if(streamInterface->available() > 3){ 
                 size_t bytesRead = streamInterface->readBytes(&readBuffer[readBufferIndex], READ_BUFFER_LENGTH - readBufferIndex);
-                if(bytesRead == 0)
-                {
-                    break;
-                }
 
-                handleMessage(readBuffer);
-                /*
-   
-                if(readBuffer[readBufferIndex+bytesRead == 'E'])
-                {
-                    // Now we know a packet has been read completely, so handle it here
+                // streamInterface->write(readBuffer, READ_BUFFER_LENGTH);
+                // streamInterface->println(bytesRead);
+                if(readBuffer[bytesRead-1] == 'E'){
                     handleMessage(readBuffer);
+                    // streamInterface->println("passed");
                     readBufferIndex = 0;
-                    // Optionally, break here if we only want to read/handle one packet maximum per loop
                 }
-                else
-                {
-                    readBufferIndex += bytesRead;
-                }
-                */
+                // handleMessage(readBuffer);
             }
+            
+            // Read bytes until there aren't any more to be read
+            // while (streamInterface->peek() != -1) 
+            // {
+                // size_t bytesRead = streamInterface->readBytes(&readBuffer[readBufferIndex], READ_BUFFER_LENGTH - readBufferIndex);
+                // if(bytesRead == 0)
+                // {
+                    // break;
+                // }
+// 
+                // handleMessage(readBuffer);
+                // /*
+//    
+                // if(readBuffer[readBufferIndex+bytesRead == 'E'])
+                // {
+                    // Now we know a packet has been read completely, so handle it here
+                    // handleMessage(readBuffer);
+                    // readBufferIndex = 0;
+                    // Optionally, break here if we only want to read/handle one packet maximum per loop
+                // }
+                // else
+                // {
+                    // readBufferIndex += bytesRead;
+                // }
+                // */
+            // }
             handleGetter_pose();
         };
         
@@ -65,19 +78,23 @@ private: // functions
         {
             int buffer_index = bytesUntilSemicolon(buffer);
 
-            float azimuth_degrees = (float)utf8DigitsToInt(buffer, buffer_index) / 100;
+            float azimuth_degrees = (float)utf8DigitsToInt(buffer, buffer_index) / 100.0;
 
             char *remainingBuffer = (char *)&buffer[buffer_index + 1];
 
             buffer_index = bytesUntilSemicolon(remainingBuffer);
 
-            float elevation_degrees = (float)utf8DigitsToInt(remainingBuffer, buffer_index) / 100;
+            float elevation_degrees = (float)utf8DigitsToInt(remainingBuffer, buffer_index) / 100.0;
+
+            // streamInterface->println(String(azimuth_degrees) + " " + String(elevation_degrees));
 
             // we only want to apply the value if the axes are zeroed.
-            if((azimuthSensor->isZeroed() && elevationSensor->isZeroed()) || true){
+            if((azimuthSensor->isZeroed() && elevationSensor->isZeroed())){
+                streamInterface->println("HI WILL");
                 azimuthController->setTarget(-azimuth_degrees);
                 elevationController->setTarget(elevation_degrees);
-                azimuthController->startController();
+                // azimuthController->startController();
+                // elevationController->startController();
             }
             
             String response = "R;P;E";
@@ -86,7 +103,7 @@ private: // functions
 
         void handleGetter_pose()
         {
-            int azimuth_degrees = round(azimuthSensor->getDistFrom0() * 100);
+            int azimuth_degrees = round(-azimuthSensor->getDistFrom0() * 100);
             int elevation_degrees = round(elevationSensor->getDistFrom0() * 100);
 
             String str = "D;L;";
@@ -113,10 +130,12 @@ private: // functions
 
         void handleGetter_imu()
         {
+            #ifdef REAL
             IMUData imuData = imu->getData();
+            
             int gravityX_gs = round(imuData.xAcc * 100);
-            int gravityY_gs = round(imuData.xAcc * 100);
-            int gravityZ_gs = round(imuData.xAcc * 100);
+            int gravityY_gs = round(imuData.yAcc * 100);
+            int gravityZ_gs = round(imuData.zAcc * 100);
 
             // TODO: implement heading calculation
             int heading_degrees = round(0 * 100);
@@ -127,8 +146,10 @@ private: // functions
             str += String(gravityZ_gs)  + ";";
             str += String(heading_degrees)  + ";";
             str += 'E';
+            
 
             send(str.c_str(), str.length());
+            #endif
         }
 
         void handleEstop_brake()
@@ -149,6 +170,9 @@ private: // functions
         {
             azimuthController->homeController();
             streamInterface->write("D;H;E");
+            // azimuthController->setTarget(0.0);
+            elevationController->startController();
+            elevationController->setTarget(elevationSensor->getDistFrom0());
         }
 
         void handleSetter(const char *buffer)

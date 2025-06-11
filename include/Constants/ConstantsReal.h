@@ -41,8 +41,8 @@ constexpr float azimuthEncoderPinionTeeth = 40; // gear teeth
 
 constexpr float azimuthGearRatio = (azimuthMainGearTeeth/azimuthMotorPinionTeeth);
 
-// constexpr float azimuthZeroOffsetDegrees = 44.011; // degrees around main azimuth axis
-constexpr float azimuthZeroOffsetDegrees = 0.0;
+constexpr float azimuthZeroOffsetDegrees = 64.011; // degrees around main azimuth axis
+// constexpr float azimuthZeroOffsetDegrees = 0.0;
 
 constexpr float elevationGearboxReduction = 20; // ratio
 constexpr float elevationChainReduction = 3; // ratio

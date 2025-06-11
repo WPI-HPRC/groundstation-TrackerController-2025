@@ -268,7 +268,8 @@ class AxisController
         {
             target = constrain(target, minimumAngle, maximumAngle);
             goalPosition = target;
-            motionProfiler.setTarget(goalPosition, sensor->getDistFrom0(), sensor->getVelocity());
+            // motionProfiler.setTarget(goalPosition, sensor->getDistFrom0(), sensor->getVelocity());
+            integralError = 0;
             state = State::running;
         };
 
@@ -295,7 +296,11 @@ class AxisController
 
         State state = State::disabled;
 
-        TeensyTimerTool::PeriodicTimer controlLoopTimer;
+        #ifdef REAL
+        TeensyTimerTool::PeriodicTimer controlLoopTimer;//(TeensyTimerTool::TCK);
+        #else
+        TeensyTimerTool::PeriodicTimer controlLoopTimer(TeensyTimerTool::TCK);
+        #endif
 
         bool reachedPosGoal = false;
         bool reachedVelGoal = false;
@@ -335,8 +340,8 @@ class AxisController
         float velocityCommand;
         float prevVelocityCommand;
 
-        float minimumAngle = __FLT_MIN__;
-        float maximumAngle = __FLT_MAX__;
+        float minimumAngle = -5000;
+        float maximumAngle = 5000;
 
         // gravity feedfoward
         float getGravityFF()
