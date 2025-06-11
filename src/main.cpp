@@ -128,7 +128,43 @@ void setup()
 
   // while(!azimuthSensor->isZeroed()){delay(1);};
 
-  // elevationController.setTarget(30);
+  
+  // for(int i = 30; i<90; i+=5){
+    // elevationController.setTarget(30);
+    // while(!elevationController.isAtPosition()){
+      // yield();
+    // }
+  // }
+
+    elevationController.setTarget(90);
+  while(!elevationController.isAtPosition()){ yield(); } delay(10);
+  elevationController.setTarget(80);
+  while(!elevationController.isAtPosition()){ yield(); } delay(10);
+  elevationController.setTarget(70);
+  while(!elevationController.isAtPosition()){ yield(); } delay(10);
+  elevationController.setTarget(60);
+  while(!elevationController.isAtPosition()){ yield(); } delay(10);
+  elevationController.setTarget(50);
+  while(!elevationController.isAtPosition()){ yield(); } delay(10);
+  elevationController.setTarget(40);
+while(!elevationController.isAtPosition()){ yield(); } delay(10);
+elevationController.setTarget(30);
+while(!elevationController.isAtPosition()){ yield(); } delay(10);
+
+  elevationController.setTarget(30);
+  while(!elevationController.isAtPosition()){ yield(); } delay(10);
+  elevationController.setTarget(40);
+  while(!elevationController.isAtPosition()){ yield(); } delay(10);
+  elevationController.setTarget(50);
+  while(!elevationController.isAtPosition()){ yield(); } delay(10);
+  elevationController.setTarget(60);
+  while(!elevationController.isAtPosition()){ yield(); } delay(10);
+  elevationController.setTarget(70);
+  while(!elevationController.isAtPosition()){ yield(); } delay(10);
+  elevationController.setTarget(80);
+while(!elevationController.isAtPosition()){ yield(); } delay(10);
+elevationController.setTarget(90);
+while(!elevationController.isAtPosition()){ yield(); } delay(10);
   // elevationController.setTarget(90);
   // elevationController.setTarget(60);
 
@@ -150,13 +186,13 @@ void loop()
 
 void interfaceLoop()
 {
-  interface();
+  // interface();
   // debugPrint();
 }
 
 void debugPrint(){
-  azimuthController.debugPrint(&SerialUSB);
-  // elevationController.debugPrint(&SerialUSB);
+  // azimuthController.debugPrint(&SerialUSB);
+  elevationController.debugPrint(&SerialUSB);
   // azimuthSensor->debugPrint(&SerialUSB);
   // elevationSensor->update();
   // elevationSensor->debugPrint(&SerialUSB);

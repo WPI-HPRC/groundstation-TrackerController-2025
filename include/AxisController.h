@@ -171,7 +171,7 @@ class AxisController
                     // we care about both velocity and position for this case
                     reachedGoal = reachedPosGoal && reachedVelGoal;
 
-                    // if(reachedPosGoal && reachedVelGoal){ state = State::stopped; }; 
+                    if(reachedPosGoal ){ state = State::stopped; }; 
 
                     break;
             }
