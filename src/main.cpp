@@ -34,6 +34,8 @@
 // temporary serial interface code for tuning / bringup
 // #include "TunerInterface.h"
 
+// #define DEBUG
+
 ////////////////////////////////////////////////////////////////////// Global Objects //////////////////////////////////////////////////////////////////////
 
 // hardware declerations for azimuth axis
@@ -113,7 +115,7 @@ void setup()
 
   // actual begin code
   delay(10);
-
+#ifdef DEBUG
   // elevationMotorDriver.begin();
   // elevationSensor->begin();
 
@@ -137,47 +139,51 @@ void setup()
   // }
 
 
-
-while(true){
-      elevationController.setTarget(90);
-  while(!elevationController.isAtPosition()){ yield(); } delay(10);
-  elevationController.setTarget(80);
-  while(!elevationController.isAtPosition()){ yield(); } delay(10);
-  elevationController.setTarget(70);
-  while(!elevationController.isAtPosition()){ yield(); } delay(10);
-  elevationController.setTarget(60);
-  while(!elevationController.isAtPosition()){ yield(); } delay(10);
-  elevationController.setTarget(50);
-  while(!elevationController.isAtPosition()){ yield(); } delay(10);
   elevationController.setTarget(40);
-while(!elevationController.isAtPosition()){ yield(); } delay(10);
-elevationController.setTarget(30);
-while(!elevationController.isAtPosition()){ yield(); } delay(10);
-elevationController.setTarget(20);
-while(!elevationController.isAtPosition()){ yield(); } delay(10);
-// elevationController.setTarget(10);
-// while(!elevationController.isAtPosition()){ yield(); } delay(10);
+
+// while(true){
+  // azimuthController.setTarget(-10);
+// while(!azimuthController.isAtGoal()){ yield(); } delay(10);
+  // azimuthController.setTarget(-20);
+// while(!azimuthController.isAtGoal()){ yield(); } delay(10);
+  // azimuthController.setTarget(-30);
+  // while(!azimuthController.isAtGoal()){ yield(); } delay(10);
+  // azimuthController.setTarget(-40);
+  // while(!azimuthController.isAtGoal()){ yield(); } delay(10);
+  // azimuthController.setTarget(-50);
+  // while(!azimuthController.isAtGoal()){ yield(); } delay(10);
+  // azimuthController.setTarget(-60);
+  // while(!azimuthController.isAtGoal()){ yield(); } delay(10);
+  // azimuthController.setTarget(-70);
+  // while(!azimuthController.isAtGoal()){ yield(); } delay(10);
+  // azimuthController.setTarget(-80);
+// while(!azimuthController.isAtGoal()){ yield(); } delay(10);
+// azimuthController.setTarget(-90);
+// while(!azimuthController.isAtGoal()){ yield(); } delay(10);
+// }
+      // azimuthController.setTarget(-90);
+  // while(!azimuthController.isAtGoal()){ yield(); } delay(10);
+  // azimuthController.setTarget(-80);
+  // while(!azimuthController.isAtGoal()){ yield(); } delay(10);
+  // azimuthController.setTarget(-70);
+  // while(!azimuthController.isAtGoal()){ yield(); } delay(10);
+  // azimuthController.setTarget(-60);
+  // while(!azimuthController.isAtGoal()){ yield(); } delay(10);
+  // azimuthController.setTarget(-50);
+  // while(!azimuthController.isAtGoal()){ yield(); } delay(10);
+  // azimuthController.setTarget(-40);
+// while(!azimuthController.isAtGoal()){ yield(); } delay(10);
+// azimuthController.setTarget(-30);
+// while(!azimuthController.isAtGoal()){ yield(); } delay(10);
+// azimuthController.setTarget(-20);
+// while(!azimuthController.isAtGoal()){ yield(); } delay(10);
+// azimuthController.setTarget(-10);
+// while(!azimuthController.isAtPosition()){ yield(); } delay(10);
 // 
-// elevationController.setTarget(10);
-// while(!elevationController.isAtPosition()){ yield(); } delay(10);
-elevationController.setTarget(20);
-while(!elevationController.isAtPosition()){ yield(); } delay(10);
-  elevationController.setTarget(30);
-  while(!elevationController.isAtPosition()){ yield(); } delay(10);
-  elevationController.setTarget(40);
-  while(!elevationController.isAtPosition()){ yield(); } delay(10);
-  elevationController.setTarget(50);
-  while(!elevationController.isAtPosition()){ yield(); } delay(10);
-  elevationController.setTarget(60);
-  while(!elevationController.isAtPosition()){ yield(); } delay(10);
-  elevationController.setTarget(70);
-  while(!elevationController.isAtPosition()){ yield(); } delay(10);
-  elevationController.setTarget(80);
-while(!elevationController.isAtPosition()){ yield(); } delay(10);
-elevationController.setTarget(90);
-while(!elevationController.isAtPosition()){ yield(); } delay(10);
-}
-
+// azimuthController.setTarget(10);
+// while(!azimuthController.isAtPosition()){ yield(); } delay(10);
+// }
+#endif
 
 
 
@@ -203,16 +209,20 @@ void loop()
 
 void interfaceLoop()
 {
-  // interface();
+  #ifndef DEBUG
+  interface();
+  #endif
   // debugPrint();
 }
 
 void debugPrint(){
+  #ifdef DEBUG
   // azimuthController.debugPrint(&SerialUSB);
   elevationController.debugPrint(&SerialUSB);
   // azimuthSensor->debugPrint(&SerialUSB);
   // elevationSensor->update();
   // elevationSensor->debugPrint(&SerialUSB);
+  #endif
 }
 
 void interface(){

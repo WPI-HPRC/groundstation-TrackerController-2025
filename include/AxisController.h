@@ -76,6 +76,7 @@ class AxisController
 
                     // we don't care about positional accuracy, just stopping ASAP
                     // so as long as we reach the goal of ~0 velocity we're fine
+                    // SerialUSB.println(reachedVelGoal);
                     reachedGoal = reachedVelGoal;
                     if (reachedVelGoal){ state = State::stopped; };
                     
@@ -175,11 +176,19 @@ class AxisController
                     
                     reachedPosGoal = ( fabs(error) < acceptableError);
                     reachedVelGoal = ( fabs(velError) < acceptableVelocityError);
-                    
-                    // we care about both velocity and position for this case
-                    reachedGoal = reachedPosGoal && reachedVelGoal;
 
-                    if(reachedPosGoal ){ state = State::stopping; }; 
+
+                    if(state != State::stopping){
+                        // we care about both velocity and position for this case
+                        reachedGoal = reachedPosGoal && reachedVelGoal;
+
+                        if(reachedPosGoal ){ state = State::stopping; };    
+                    }
+                    else{
+                        reachedGoal = reachedVelGoal;
+                        if (reachedVelGoal){ state = State::stopped; };
+                    }
+                
 
                     break;
             }
