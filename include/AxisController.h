@@ -77,7 +77,7 @@ class AxisController
                     // we don't care about positional accuracy, just stopping ASAP
                     // so as long as we reach the goal of ~0 velocity we're fine
                     reachedGoal = reachedVelGoal;
-                    if (reachedVelGoal){ state = State::disabled; };
+                    if (reachedVelGoal){ state = State::stopped; };
                     
                     [[fallthrough]]; // we intentionally fall through here to continue to run the motion profiler while stopping
 
@@ -143,9 +143,10 @@ class AxisController
                     if(clampedVelocityCommand == velocityCommand){
                         velocityLimitApplied = false;
                     }
-                    velocityCommand = clampedVelocityCommand;
+                    
                     if(velocityLimitApplied){
-                        SerialUSB.println("VEL LIMIT APPLIED");
+                        // SerialUSB.println("VEL LIMIT APPLIED");
+                        velocityCommand = clampedVelocityCommand;
                     }
                     // constrain our velocity command to be within the maximum allowed acceleration
                     /*
@@ -154,16 +155,17 @@ class AxisController
                         then reapply it to our previously stored velocity command
                     */
                     float deltaV = velocityCommand - prevVelocityCommand;
-                    float maxDeltaV = maxAccelerationLimit * gearRatio * 0.01;
+                    float maxDeltaV = maxAccelerationLimit * 0.01;
                     deltaV = constrain(deltaV, -maxDeltaV, maxDeltaV);
-                    velocityCommand = prevVelocityCommand + deltaV;
+                    float accelLimitedvelocityCommand = prevVelocityCommand + deltaV;
                     
                     bool accelLimitApplied = true;
-                    if(velocityCommand == clampedVelocityCommand){
+                    if(velocityCommand == accelLimitedvelocityCommand){
                         accelLimitApplied = false;
                     }
                     if(accelLimitApplied){
-                        SerialUSB.println("Accel limiting! Accel limiting! Accel limiting! Accel limiting! Accel limiting! Accel limiting! Accel limiting! Accel limiting! ");
+                        velocityCommand = accelLimitedvelocityCommand;
+                        // SerialUSB.println("Accel limiting! Accel limiting! Accel limiting! Accel limiting! Accel limiting! Accel limiting! Accel limiting! Accel limiting! ");
                     }
 
                     if(!velocityLimitApplied && !accelLimitApplied && !reachedGoal){
@@ -177,7 +179,7 @@ class AxisController
                     // we care about both velocity and position for this case
                     reachedGoal = reachedPosGoal && reachedVelGoal;
 
-                    if(reachedPosGoal ){ state = State::stopped; }; 
+                    if(reachedPosGoal ){ state = State::stopping; }; 
 
                     break;
             }
@@ -245,7 +247,7 @@ class AxisController
             // update to have our goal be to stop in the current position (there will be some overshoot with this method but that's fine)
             setTarget(sensor->getDistFrom0());
 
-            state = State::stopping;            
+            state = State::disabled;            
             return false;
         };
 

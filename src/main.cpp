@@ -83,7 +83,7 @@ void sendTunerData(float desiredPos, float actualPos, float desiredVel, float ac
 
 void setup() 
 {
-  SerialUSB.begin(9600);
+  SerialUSB.begin(115200);
   while(!SerialUSB){} // wait for connection
 
   SerialUSB.setTimeout(5);
@@ -136,7 +136,10 @@ void setup()
     // }
   // }
 
-    elevationController.setTarget(90);
+
+
+while(true){
+      elevationController.setTarget(90);
   while(!elevationController.isAtPosition()){ yield(); } delay(10);
   elevationController.setTarget(80);
   while(!elevationController.isAtPosition()){ yield(); } delay(10);
@@ -150,7 +153,15 @@ void setup()
 while(!elevationController.isAtPosition()){ yield(); } delay(10);
 elevationController.setTarget(30);
 while(!elevationController.isAtPosition()){ yield(); } delay(10);
-
+elevationController.setTarget(20);
+while(!elevationController.isAtPosition()){ yield(); } delay(10);
+// elevationController.setTarget(10);
+// while(!elevationController.isAtPosition()){ yield(); } delay(10);
+// 
+// elevationController.setTarget(10);
+// while(!elevationController.isAtPosition()){ yield(); } delay(10);
+elevationController.setTarget(20);
+while(!elevationController.isAtPosition()){ yield(); } delay(10);
   elevationController.setTarget(30);
   while(!elevationController.isAtPosition()){ yield(); } delay(10);
   elevationController.setTarget(40);
@@ -165,6 +176,12 @@ while(!elevationController.isAtPosition()){ yield(); } delay(10);
 while(!elevationController.isAtPosition()){ yield(); } delay(10);
 elevationController.setTarget(90);
 while(!elevationController.isAtPosition()){ yield(); } delay(10);
+}
+
+
+
+
+
   // elevationController.setTarget(90);
   // elevationController.setTarget(60);
 

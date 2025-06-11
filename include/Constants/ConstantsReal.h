@@ -19,14 +19,14 @@ constexpr float azimuthkD   = 0.1; // unitless
 constexpr float homingVelocity = 0.5; // degrees per second
 
 
-constexpr float elevationMaxVelocity      = 20.0; // degrees per second
-constexpr float elevationMaxAcceleration  = 60.0; // degrees per second^2
+constexpr float elevationMaxVelocity      = 7.0; // degrees per second
+constexpr float elevationMaxAcceleration  = 7.0; // degrees per second^2
 
 constexpr float elevationAcceptableError = 3.0; // degrees
 constexpr float elevationAcceptableVelocityError = 10.0; // degrees per second
 
-constexpr float elevationFF   = 1.5; // technically units of velocity
-constexpr float elevationkP   = 0.29; // unitless
+constexpr float elevationFF   = 1.6; // technically units of velocity
+constexpr float elevationkP   = 0.5; // unitless
 constexpr float elevationkI   = 0.6; // unitless
 constexpr float elevationkD   = 0.1; // unitless
 constexpr float elevationGravityCompFactor = 0.5; // technically not unitless, but determined emperically, not by calculation
