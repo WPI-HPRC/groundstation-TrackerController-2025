@@ -5,8 +5,8 @@
 
 ////////////////////////////////////////////////////////////////////// Tuning Parameters //////////////////////////////////////////////////////////////////////
 
-constexpr float azimuthMaxVelocity      = 10.0; // degrees per second
-constexpr float azimuthMaxAcceleration  = 1.0; // degrees per second^2
+constexpr float azimuthMaxVelocity      = 5.0; // degrees per second
+constexpr float azimuthMaxAcceleration  = 0.5; // degrees per second^2
 
 constexpr float azimuthAcceptableError = 5.0; // degrees
 constexpr float azimuthAcceptableVelocityError = 5.0; // degrees per second
@@ -28,8 +28,8 @@ constexpr float elevationAcceptableVelocityError = 10.0; // degrees per second
 constexpr float elevationFF   = 1.5; // technically units of velocity
 constexpr float elevationkP   = 0.29; // unitless
 constexpr float elevationkI   = 0.6; // unitless
-constexpr float elevationkD   = 0.15; // unitless
-constexpr float elevationGravityCompFactor = 0.1; // technically not unitless, but determined emperically, not by calculation
+constexpr float elevationkD   = 0.1; // unitless
+constexpr float elevationGravityCompFactor = 0.5; // technically not unitless, but determined emperically, not by calculation
 
 constexpr float controlLoopTimeStep = 10000; // microseconds - 10000us = 10ms = 100Hz control loop update rate
 

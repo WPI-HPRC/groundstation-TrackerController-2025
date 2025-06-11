@@ -139,11 +139,14 @@ class AxisController
                     // the velocity limits we set are for the output of the system. we need to multiply them by the output of the gear ratio to get the correct limits
                     // bc the velocity command is the velocity of the motor output 
                     bool velocityLimitApplied = true;
-                    float clampedVelocityCommand = constrain(velocityCommand, -maxVelocityLimit*gearRatio, maxVelocityLimit*gearRatio);
+                    float clampedVelocityCommand = constrain(velocityCommand, -maxVelocityLimit, maxVelocityLimit);
                     if(clampedVelocityCommand == velocityCommand){
                         velocityLimitApplied = false;
                     }
                     velocityCommand = clampedVelocityCommand;
+                    if(velocityLimitApplied){
+                        SerialUSB.println("VEL LIMIT APPLIED");
+                    }
                     // constrain our velocity command to be within the maximum allowed acceleration
                     /*
                         we first figure out what the change in velocity between loop cycles is
@@ -158,6 +161,9 @@ class AxisController
                     bool accelLimitApplied = true;
                     if(velocityCommand == clampedVelocityCommand){
                         accelLimitApplied = false;
+                    }
+                    if(accelLimitApplied){
+                        SerialUSB.println("Accel limiting! Accel limiting! Accel limiting! Accel limiting! Accel limiting! Accel limiting! Accel limiting! Accel limiting! ");
                     }
 
                     if(!velocityLimitApplied && !accelLimitApplied && !reachedGoal){
