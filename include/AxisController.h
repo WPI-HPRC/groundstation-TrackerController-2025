@@ -316,7 +316,7 @@ class AxisController
         #ifdef REAL
         TeensyTimerTool::PeriodicTimer controlLoopTimer;//(TeensyTimerTool::TCK);
         #else
-        TeensyTimerTool::PeriodicTimer controlLoopTimer(TeensyTimerTool::TCK);
+        TeensyTimerTool::PeriodicTimer controlLoopTimer;//(TeensyTimerTool::TCK);
         #endif
 
         bool reachedPosGoal = false;
