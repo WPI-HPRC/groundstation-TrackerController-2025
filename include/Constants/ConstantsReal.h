@@ -8,10 +8,10 @@
 constexpr float azimuthMaxVelocity      = 10.0; // degrees per second
 constexpr float azimuthMaxAcceleration  = 5.0; // degrees per second^2
 
-constexpr float azimuthAcceptableError = 2.0; // degrees
-constexpr float azimuthAcceptableVelocityError = 1.0; // degrees per second
+constexpr float azimuthAcceptableError = 4.0; // degrees
+constexpr float azimuthAcceptableVelocityError = 2.0; // degrees per second
 
-constexpr float azimuthFF   = 0.1; // technically units of velocity
+constexpr float azimuthFF   = 0.05; // technically units of velocity
 constexpr float azimuthkP   = 0.3; // unitless
 constexpr float azimuthkI   = 0.0; // unitless
 constexpr float azimuthkD   = 1.0; // unitless
@@ -20,9 +20,9 @@ constexpr float homingVelocity = 0.5; // degrees per second
 
 
 constexpr float elevationMaxVelocity      = 7.0; // degrees per second
-constexpr float elevationMaxAcceleration  = 7.0; // degrees per second^2
+constexpr float elevationMaxAcceleration  = 11.0; // degrees per second^2
 
-constexpr float elevationAcceptableError = 3.0; // degrees
+constexpr float elevationAcceptableError = 4.0; // degrees
 constexpr float elevationAcceptableVelocityError = 10.0; // degrees per second
 
 constexpr float elevationFF   = 1.6; // technically units of velocity
