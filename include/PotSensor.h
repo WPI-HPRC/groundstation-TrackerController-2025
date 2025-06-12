@@ -4,6 +4,9 @@
 
 #include "Sensor.h"
 
+#define LOWPASS
+constexpr float alpha = 0.2;
+
 class PotSensor : public Sensor
 {
     public:
@@ -63,12 +66,15 @@ class PotSensor : public Sensor
         {
             float newReading = analogRead(analogPin);
 
+            #ifdef LOWPASS
+            currentPos = alpha * newReading + (1 - alpha) * currentPos;
+            #else
             // SerialUSB.println(abs(newReading-currentPos));
             if(abs(newReading-currentPos) < 3){
                 return 1;
             }
             currentPos = newReading;
-            
+            #endif
             
             // currentPos = analogRead(analogPin);
 

@@ -34,7 +34,7 @@
 // temporary serial interface code for tuning / bringup
 // #include "TunerInterface.h"
 
-// #define DEBUG
+#define DEBUG
 
 ////////////////////////////////////////////////////////////////////// Global Objects //////////////////////////////////////////////////////////////////////
 
@@ -218,10 +218,10 @@ void interfaceLoop()
 void debugPrint(){
   #ifdef DEBUG
   // azimuthController.debugPrint(&SerialUSB);
-  elevationController.debugPrint(&SerialUSB);
+  // elevationController.debugPrint(&SerialUSB);
   // azimuthSensor->debugPrint(&SerialUSB);
   // elevationSensor->update();
-  // elevationSensor->debugPrint(&SerialUSB);
+  elevationSensor->debugPrint(&SerialUSB);
   #endif
 }
 
