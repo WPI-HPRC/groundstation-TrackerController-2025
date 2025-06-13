@@ -34,7 +34,7 @@
 // temporary serial interface code for tuning / bringup
 // #include "TunerInterface.h"
 
-#define DEBUG
+// #define DEBUG
 
 ////////////////////////////////////////////////////////////////////// Global Objects //////////////////////////////////////////////////////////////////////
 
@@ -139,7 +139,7 @@ void setup()
   // }
 
 
-  elevationController.setTarget(40);
+  // elevationController.setTarget(40);
 
 // while(true){
   // azimuthController.setTarget(-10);
@@ -183,17 +183,19 @@ void setup()
 // azimuthController.setTarget(10);
 // while(!azimuthController.isAtPosition()){ yield(); } delay(10);
 // }
-#endif
 
-
-
-
-  // elevationController.setTarget(90);
+  elevationController.setTarget(90);
   // elevationController.setTarget(60);
 
   // azimuthController.setTarget(40);
   // azimuthController.setTarget(90);
   // azimuthController.setTarget(10);
+#endif
+
+
+
+
+
 }
 
 ////////////////////////////////////////////////////////////////////// loop() //////////////////////////////////////////////////////////////////////
@@ -218,10 +220,10 @@ void interfaceLoop()
 void debugPrint(){
   #ifdef DEBUG
   // azimuthController.debugPrint(&SerialUSB);
-  // elevationController.debugPrint(&SerialUSB);
+  elevationController.debugPrint(&SerialUSB);
   // azimuthSensor->debugPrint(&SerialUSB);
   // elevationSensor->update();
-  elevationSensor->debugPrint(&SerialUSB);
+  // elevationSensor->debugPrint(&SerialUSB);
   #endif
 }
 
@@ -237,7 +239,7 @@ void configureHardware()
   azimuthSensor->setPhysicalConversionConstant(azimuthConversionRatio);
   azimuthSensor->setZeroOffset(azimuthZeroOffsetDegrees);
   azimuthMotorDriver.setPins(azimuthDirection, azimuthStep);
-  azimuthMotorDriver.setPhysicalConstants(DegreesPerStepAzimuth, microStepResolution);
+  azimuthMotorDriver.setPhysicalConstants(DegreesPerStepAzimuth, microStepResolutionAzimuth);
 
   // configure azimuth motion controller
   azimuthController.setPhysicalLimits(azimuthMaxVelocity, azimuthMaxAcceleration, azimuthGearRatio);
@@ -249,7 +251,7 @@ void configureHardware()
   elevationSensor->setPhysicalConversionConstant(elevationConversionRatio);
   elevationSensor->setZero(elevationMinimumValue); // we only do this for the elevation, azimuth zeroes itself
   elevationMotorDriver.setPins(elevationDirection, elevationStep, elevationDirection2, elevationStep2);
-  elevationMotorDriver.setPhysicalConstants(DegreesPerStepElevation, microStepResolution);
+  elevationMotorDriver.setPhysicalConstants(DegreesPerStepElevation, microStepResolutionElevation);
 
   // configure elevation motion controller
   elevationController.setPhysicalLimits(elevationMaxVelocity, elevationMaxAcceleration, elevationGearRatio);

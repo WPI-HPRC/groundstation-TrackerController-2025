@@ -52,15 +52,16 @@ constexpr float elevationGearRatio = (elevationGearboxReduction * elevationChain
 constexpr int azimuthEncoderActualTicksPerRev = 600; // encoder ticks per rev
 constexpr float azimuthEncoderTicksPerRev = azimuthEncoderActualTicksPerRev*4; // quadurature counting means 4 counts per pulse
 
-constexpr int microStepResolution = 40000;
+constexpr int microStepResolutionAzimuth = 40000;
+constexpr int microStepResolutionElevation = 40000;
 constexpr float DegreesPerStepAzimuth = 1.8f;
 constexpr float DegreesPerStepElevation = 1.8f;
 
 ////////////////////////////////////////////////////////////////////// Sensor Calibration Values //////////////////////////////////////////////////////////////////////
 
 // must be determined emperically 
-constexpr uint16_t elevationMinimumValue = 249; // ADC reading value
-constexpr uint16_t elevationMaximumValue = 829; // ADC reading value
+constexpr uint16_t elevationMinimumValue = 180; // ADC reading value
+constexpr uint16_t elevationMaximumValue = 837; // ADC reading value
 
 // must be determined/defined
 constexpr float elevationMinimumAngle = 0.0f; // degrees
